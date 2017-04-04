@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.EduExperienceDao">
+	<sql id="eduExperienceColumns">
+		a.id,
+		a.employee_id as "employee.id",
+		a.diploma,
+		a.diploma_country,
+		a.diploma_institutions,
+		a.major,
+		a.whether_normal_majors,
+		a.school_years,
+		a.graduate_years,
+		a.degree_level,
+		a.degree_name,
+		a.degree_countries,
+		a.degree_institutions,
+		a.degree_granting_years,
+		a.learning_style,
+		a.category_learning_unit,
+		a.degree_in_time,
+		a.research_direction,
+		a.whether_overseas,
+		a.professional_description,
+		a.remark,
+		a.del_flag
+
+
+	</sql>
+
+	<sql id="eduExperienceJoins">
+
+	</sql>
+
+	<!-- 根据编号获得经历 -->
+	<select id="get" resultType="EduExperience">
+		SELECT
+		<include refid="eduExperienceColumns" />
+		FROM hr_edu_experience a
+		<include refid="eduExperienceJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询 -->
+	<select id="findList" resultType="EduExperience">
+		SELECT
+		<include refid="eduExperienceColumns" />
+		FROM hr_edu_experience a
+		<include refid="eduExperienceJoins" />
+
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+
+
+	</select>
+
+	<!-- 查询全部 -->
+	<select id="findAllList" resultType="EduExperience">
+		SELECT
+		<include refid="eduExperienceColumns" />
+		FROM hr_edu_experience a
+		<include refid="eduExperienceJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+
+	</select>
+
+	<!-- 增加用户学习经历 -->
+	<insert id="insert">
+		INSERT INTO hr_edu_experience(
+		id,
+		employee_id,
+		diploma,
+		diploma_country,
+		diploma_institutions,
+		major,
+		whether_normal_majors,
+		school_years,
+		graduate_years,
+		degree_level,
+		degree_name,
+		degree_countries,
+		degree_institutions,
+		degree_granting_years,
+		learning_style,
+		category_learning_unit,
+		degree_in_time,
+		research_direction,
+		whether_overseas,
+		professional_description,
+		remark,
+		del_flag
+		)VALUES(
+		#{id},
+		#{employee.id},
+		#{diploma},
+		#{diplomaCountry},
+		#{diplomaInstitutions},
+		#{major},
+		#{whetherNormalMajors},
+		#{schoolYears},
+		#{graduateYears},
+		#{degreeLevel},
+		#{degreeName},
+		#{degreeCountries},
+		#{degreeInstitutions},
+		#{degreeGrantingYears},
+		#{learningStyle},
+		#{categoryLearningUnit},
+		#{degreeInTime},
+		#{researchDirection},
+		#{whetherOverseas},
+		#{professionalDescription},
+		#{remark},
+		#{delFlag}
+		)
+	</insert>
+
+	<!--更新用户学习经历 -->
+	<update id="update">
+		UPDATE hr_edu_experience SET
+		id=#{id},
+		employee_id=#{employee.id},
+		diploma=#{diploma},
+		diploma_country=#{diplomaCountry},
+		diploma_institutions=#{diplomaInstitutions},
+		major=#{major},
+		whether_normal_majors=#{whetherNormalMajors},
+		school_years=#{schoolYears},
+		graduate_years=#{graduateYears},
+		degree_level=#{degreeLevel},
+		degree_name=#{degreeName},
+		degree_countries=#{degreeCountries},
+		degree_institutions=#{degreeInstitutions},
+		degree_granting_years=#{degreeGrantingYears},
+		learning_style=#{learningStyle},
+		category_learning_unit=#{categoryLearningUnit},
+		degree_in_time=#{degreeInTime},
+		research_direction=#{researchDirection},
+		whether_overseas=#{whetherOverseas},
+		professional_description=#{professionalDescription},
+		remark=#{remark},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+	<!--删除用户学习经历 -->
+	<delete id="delete">
+		UPDATE hr_edu_experience SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

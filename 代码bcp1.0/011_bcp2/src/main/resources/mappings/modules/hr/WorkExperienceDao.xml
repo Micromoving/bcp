@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.WorkExperienceDao">
+	<sql id="workExperienceColumns">
+		a.id,
+		a.employee_id as "employee.id",
+		a.name_of_service_unit,
+		a.start_date,
+		a.end_date,
+		a.company_nature,
+		a.post,
+		a.job_description,
+		a.job_type,
+		a.remarks,
+		a.company_department,
+		o.id as "office.id",
+		o.name as "office.name",
+		e.name as "employee.name",
+		a.del_flag
+		
+	</sql>
+
+	<sql id="workExperienceJoins">
+		LEFT JOIN hr_employee e on e.id=a.employee_id
+		LEFT JOIN sys_user u on u.id=a.employee_id
+		LEFT JOIN sys_office o on o.id=u.office_id
+	</sql>
+
+	<!-- 根据编号获得荣誉信息 -->
+	<select id="get" resultType="WorkExperience">
+		SELECT
+		<include refid="workExperienceColumns" />
+		FROM hr_work_experience a
+		<include refid="workExperienceJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询荣誉信息 -->
+	<select id="findList" resultType="WorkExperience">
+		SELECT
+		<include refid="workExperienceColumns" />
+		FROM hr_work_experience a
+		<include refid="workExperienceJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="user!=null and user.name!=null and user.name!=''">
+			and u.name like
+			<if test="dbName == 'oracle'">'%'||#{user.name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{user.name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{user.name}, '%')</if>
+		</if>
+		<!-- 按部门查询 -->
+		<if test="office!=null and office.id != null and office.id != ''">
+			AND (u.office_id = #{office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+		
+		 <!-- 按单位性质查询 -->
+		<if test="companyNature!=null and companyNature!=''">
+		    AND (a.company_nature = #{companyNature} )
+		</if>
+		<!-- 按工作类型查询 -->
+		<if test="jobType!=null and jobType!=''">
+		    AND (a.job_type = #{jobType} )
+		</if>
+		<!--  数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY u.login_name,u.office_id, e.in_school_date
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 查询全部 -->
+	<select id="findAllList" resultType="WorkExperience">
+		SELECT
+		<include refid="workExperienceColumns" />
+		FROM hr_work_experience a
+		<include refid="workExperienceJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!-- 增加工作经历信息 -->
+	<insert id="insert">
+		INSERT INTO hr_work_experience(
+		id,
+		employee_id,
+		name_of_service_unit,
+		start_date,
+		end_date,
+		company_nature,
+		post,
+		job_description,
+		job_type,
+		remarks,
+		company_department,
+		del_flag
+
+		)VALUES(
+		#{id},
+		#{employee.id},
+		#{nameOfServiceUnit},
+		#{startDate},
+		#{endDate},
+		#{companyNature},
+		#{post},
+		#{jobDescription},
+		#{jobType},
+		#{remarks},
+		#{companyDepartment},
+		#{delFlag}
+		)
+	</insert>
+
+	<!--更新工作经历信息 -->
+	<update id="update">
+		UPDATE hr_work_experience SET
+		id=#{id},
+		employee_id=#{employee.id},
+		name_of_service_unit=#{nameOfServiceUnit},
+		start_date=#{startDate},
+		end_date=#{endDate},
+		company_nature=#{companyNature},
+		post=#{post},
+		job_description=#{jobDescription},
+		job_type=#{jobType},
+		remarks=#{remarks},
+		company_department=#{companyDepartment},
+		del_flag =
+		#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+	<!--删除工作经历信息 -->
+	<delete id="delete">
+		UPDATE hr_work_experience SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

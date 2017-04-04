@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.ProTechPositionDao">
+
+   
+    <sql id="proTechPositionColumns">
+	    a.id,	
+		a.employee_id as "user.id",
+		b.user_no as "employee.userNo",
+		u.name as "user.name",
+		a.tech_position_type,													
+		a.tech_position_level,													
+		a.name,													
+		a.gain_date,													
+		a.appoint_date,
+		a.update_date,
+		a.del_flag											
+        
+    </sql>
+    
+    <sql id="proTechPositionJoins">
+    	LEFT JOIN hr_user_employee b ON b.id = a.employee_id
+    	LEFT JOIN sys_user u on u.id=a.employee_id
+		
+    </sql>
+  
+    <!--根据用户编号查询用户职称情况信息 -->
+	<select id="get" resultType="ProTechPosition">
+		SELECT
+		<include refid="proTechPositionColumns" />
+		FROM hr_pro_tech_position a
+		<include refid="proTechPositionJoins"/>
+		WHERE
+ 			a.id=#{id}
+	</select>
+	<!--根据用户编号查询用户职称情况信息 -->
+	<select id="getMax" resultType="ProTechPosition">
+		SELECT
+		<include refid="proTechPositionColumns" />
+		FROM hr_pro_tech_position a
+		WHERE
+
+		a.employee_id = #{user.id} and (select "MAX"(TECH_POSITION_LEVEL) from
+		HR_PRO_TECH_POSITION)=a.TECH_POSITION_LEVEL
+		</select>
+    <!--分页查询-->
+    <select id="findList" resultType="ProTechPosition">
+		SELECT
+			<include refid="proTechPositionColumns"/>
+		FROM hr_pro_tech_position a
+		<include refid="proTechPositionJoins"/>
+		WHERE a.employee_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+		ORDER BY a.tech_position_level,a.tech_position_type
+	</select>    
+	<!--全部查询-->
+	<select id="findAllList" resultType="ProTechPosition">
+		SELECT
+			<include refid="proTechPositionColumns"/>
+		FROM hr_pro_tech_position a
+		<include refid="proTechPositionJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		order by b.user_no asc
+	</select>
+
+    <!--增加用户职称情况信息-->
+    <insert id="insert">
+        INSERT INTO hr_pro_tech_position(
+         	id,	
+			employee_id,
+			tech_position_type,													
+			tech_position_level,													
+			name,													
+			gain_date,													
+			appoint_date,
+			update_date,
+			del_flag	
+        )VALUES(
+	        #{id},
+            #{user.id},
+		    #{techPositionType},
+		    #{techPositionLevel},
+		    #{name},
+		    #{gainDate},
+		    #{appointDate},
+		    #{updateDate},
+		    #{delFlag}
+	    )
+    </insert>
+    
+    <!-- 更新用户职称情况信息 -->
+    <update id="update">
+		UPDATE hr_pro_tech_position SET 
+			id = #{id},
+            employee_id = #{user.id},
+		    tech_position_type = #{techPositionType},													
+			tech_position_level = #{techPositionLevel},													
+			name = #{name},													
+			gain_date = #{gainDate},													
+			appoint_date = #{appointDate},
+			update_date = #{updateDate},
+			del_flag = #{delFlag}	
+		WHERE id = #{id}
+	</update>
+
+	<!-- 逻辑删除用户职称情况信息 -->
+	<update id="delete">
+		UPDATE hr_pro_tech_position SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!--根据专业技术职务判断  -->
+    <select id="count" resultType="int">
+        SELECT
+			COUNT (*)
+		FROM
+			hr_pro_tech_position
+		WHERE employee_id = #{user.id} 
+		AND name = #{name}
+		 AND del_flag = #{DEL_FLAG_NORMAL}	   
+    </select>
+	
+	
+	
+	
+</mapper>	

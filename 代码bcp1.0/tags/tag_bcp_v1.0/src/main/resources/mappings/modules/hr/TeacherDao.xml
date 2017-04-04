@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.TeacherDao">
+	<sql id="teacherColumns">
+		a.id,
+		b.name as "user.name",
+		b.photo as "user.photo",
+		b.company_id as "user.company.id",
+		b.office_id as "user.office.id",
+		a.num,
+		a.gender,
+		a.birth_date,
+		a.specialty,
+		a.end_edu_background,
+		a.academic_degree,
+		a.graduate_school,
+		a.research_area,
+		a.professional_title,
+		a.professional_type,
+		a.professional_level,
+		a.job_title_date,
+		a.in_work_date,
+		a.in_school_date,
+		a.dpro_titled,
+		a.politics_status,
+		a.papers_type,
+		a.papers_number,
+		a.qq_id,
+		a.postcode,
+		a.wechat_id,
+		a.home_add,
+		a.email,
+		a.marital_status,
+		a.phone,
+		a.mobile,
+		a.resume,
+		a.homepage,
+		a.nation,
+		a.native_place,
+		a.duties,
+		c.name AS
+		"company.name",
+		o.grade AS "office.grade" ,		
+		o.id AS "office.id" ,
+		o.parent_id AS "office.parent" ,
+		o.name AS "office.name"
+	</sql>
+
+	<sql id="teacherJoins">
+		LEFT JOIN sys_user b ON b.id = a.id
+		LEFT JOIN sys_office c ON c.id = b.company_id
+		LEFT JOIN sys_office o ON o.id = b.office_id
+	</sql>
+
+	<!-- 根据编号获得用户 -->
+	<select id="get" resultType="Teacher">
+		SELECT
+		<include refid="teacherColumns" />
+		FROM sys_user_teacher a
+		<include refid="teacherJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询用户信息 -->
+	<select id="findList" resultType="Teacher">
+		SELECT
+		<include refid="teacherColumns" />
+		FROM sys_user_teacher a
+		<include refid="teacherJoins" />
+
+		WHERE b.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 按职称查询 -->
+		<if test="professionalTitle != null and professionalTitle !=''">
+			AND (a.professional_title = #{professionalTitle} OR
+			a.professional_title LIKE
+			<if test="dbName == 'oracle'">'%,'||#{professionalTitle}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{professionalTitle}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{professionalTitle}, ',%'))</if>
+		</if>
+		<!-- 按职级查询 -->
+		<if test="professionalLevel != null and professionalLevel != ''">
+			AND (a.professional_level = #{professionalLevel} OR
+			a.professional_level LIKE
+			<if test="dbName == 'oracle'">'%,'||#{a.professional_level}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{a.professional_level}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{a.professional_level}, ',%'))</if>
+		</if>
+
+		<!-- 按姓名查询 -->
+		<if test="name != null and name != ''">
+			AND b.name like
+			<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{name}, '%')</if>
+		</if>
+
+		<!-- 按部门查询 -->
+		<if test=" office.id != null and office.id != ''">
+			AND (b.office_id = #{office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.num,b.office_id, a.in_school_date
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 查询全部用户 -->
+	<select id="findAllList" resultType="Teacher">
+		SELECT
+		<include refid="teacherColumns" />
+		FROM sys_user a
+		<include refid="teacherJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		ORDER BY a.professional_title,
+		a.in_school_date
+	</select>
+
+	<!-- 插入教师信息 -->
+	<insert id="insert">
+		INSERT INTO sys_user_teacher(
+		id,
+		num,
+		gender,
+		birth_date,
+		specialty,
+		end_edu_background,
+		academic_degree,
+		graduate_school,
+		research_area,
+		professional_title,
+		professional_type,
+		professional_level,
+		job_title_date,
+		in_work_date,
+		in_school_date,
+		dpro_titled,
+		politics_status,
+		papers_type,
+		papers_number,
+		qq_id,
+		postcode,
+		wechat_id,
+		home_add,
+		email,
+		marital_status,
+		phone,
+		mobile,
+		resume,
+		homepage,
+		nation,
+		native_place,
+		duties
+		)VALUES(
+		#{id},
+		#{num},
+		#{gender},
+		#{birthDate},
+		#{specialty},
+		#{endEduBackground},
+		#{academicDegree},
+		#{graduateSchool},
+		#{researchArea},
+		#{professionalTitle},
+		#{professionalType},
+		#{professionalLevel},
+		#{jobTitleDate},
+		#{inWorkDate},
+		#{inSchoolDate},
+		#{dproTitled},
+		#{politicsStatus},
+		#{papersType},
+		#{papersNumber},
+		#{qqId},
+		#{postcode},
+		#{wechatId},
+		#{homeAdd},
+		#{email},
+		#{maritalStatus},
+		#{phone},
+		#{mobile},
+		#{resume},
+		#{homepage},
+		#{nation} ,
+		#{nativePlace},
+		#{duties}
+		)
+	</insert>
+
+	<!--更新用户教师信息 -->
+	<update id="update">
+		UPDATE sys_user_teacher SET
+		id = #{id},
+		num = #{num},
+		gender = #{gender},
+		birth_date = #{birthDate},
+		specialty = #{specialty},
+		end_edu_background = #{endEduBackground},
+		academic_degree = #{academicDegree},
+		graduate_school = #{graduateSchool},
+		research_area = #{researchArea},
+		professional_title = #{professionalTitle},
+		professional_type = #{professionalType},
+		professional_level = #{professionalLevel},
+		job_title_date = #{jobTitleDate},
+		in_work_date = #{inWorkDate},
+		in_school_date = #{inSchoolDate},
+		dpro_titled = #{dproTitled},
+		politics_status = #{politicsStatus},
+		papers_type = #{papersType},
+		papers_number = #{papersNumber},
+		qq_id = #{qqId},
+		postcode = #{postcode},
+		wechat_id = #{wechatId},
+		home_add = #{homeAdd},
+		email = #{email},
+		marital_status = #{maritalStatus},
+		phone = #{phone},
+		mobile = #{mobile},
+		resume = #{resume},
+		homepage= #{homepage},
+		nation=#{nation} ,
+		native_place= #{nativePlace},
+		duties= #{duties}
+		WHERE id = #{id}
+	</update>
+
+	<!--删除用户教师信息 -->
+	<delete id="delete">
+		DELETE FROM sys_user_teacher WHERE id = #{id}
+	</delete>
+
+</mapper>

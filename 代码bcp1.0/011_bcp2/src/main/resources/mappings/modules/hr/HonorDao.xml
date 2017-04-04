@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.HonorDao">
+	<sql id="honorColumns">
+		a.id,
+		a.EMPLOYEE_ID as "employee.id",
+		a.honor_level,
+		a.receive_honorary_title,
+		a.honor_record_description,
+		a.honorary_award_unit,
+		a.del_flag,
+		o.id as "employee.office.id",
+		o.name as "employee.office.name",
+		e.name as "employee.name",
+		u.login_name as "user.loginName"
+	</sql>
+
+	<sql id="honorJoins">
+		LEFT JOIN hr_employee e on e.id=a.employee_id
+		LEFT JOIN sys_user u on u.id=a.employee_id
+		LEFT JOIN sys_office o on o.id=u.office_id
+	</sql>
+
+	<!-- 根据编号获得荣誉信息 -->
+	<select id="get" resultType="Honor">
+		SELECT
+		<include refid="honorColumns" />
+		FROM hr_honor a
+		<include refid="honorJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询荣誉信息 -->
+	<select id="findList" resultType="Honor">
+		SELECT
+		<include refid="honorColumns" />
+		FROM hr_honor a
+		<include refid="honorJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="user!=null and user.name!=null and user.name!=''">
+			and u.name like
+			<if test="dbName == 'oracle'">'%'||#{user.name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{user.name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{user.name}, '%')</if>
+		</if>
+		<!-- 按部门查询 -->
+		<if test="office!=null and office.id != null and office.id != ''">
+			AND (u.office_id = #{office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+		
+		 <!-- 按荣誉级别查询 -->
+		<if test="honorLevel!=null and honorLevel!=''">
+		    AND (a.honor_level = #{honorLevel} )
+		</if>
+		<!--  数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY u.login_name,u.office_id, e.in_school_date
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 查询全部 -->
+	<select id="findAllList" resultType="Honor">
+		SELECT
+		<include refid="honorColumns" />
+		FROM hr_honor a
+		<include refid="honorJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!-- 增加用户荣誉信息 -->
+	<insert id="insert">
+		INSERT INTO hr_honor(
+		id,
+		EMPLOYEE_ID,
+		honor_level,
+		receive_honorary_title,
+		honor_record_description,
+		honorary_award_unit,
+		del_flag
+
+
+		)VALUES(
+		#{id},
+		#{employee.id},
+		#{honorLevel},
+		#{receiveHonoraryTitle},
+		#{honorRecordDescription},
+		#{honoraryAwardunit},
+		#{delFlag}
+
+		)
+	</insert>
+
+	<!--更新用户荣誉信息 -->
+	<update id="update">
+		UPDATE hr_honor SET
+		id=#{id},
+		EMPLOYEE_ID=#{employee.id},
+		honor_level=#{honorLevel},
+		receive_honorary_title=#{receiveHonoraryTitle},
+		honor_record_description=#{honorRecordDescription},
+		honorary_award_unit=#{honoraryAwardunit},
+		del_flag=#{delFlag}
+		WHERE id =
+		#{id}
+	</update>
+
+	<!--删除用户荣誉信息 -->
+	<delete id="delete">
+		UPDATE hr_honor SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

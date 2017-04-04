@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.NotSeriesSalaryItemsDao">
+
+
+    <sql id="notSeriesSalaryItemsColumns">
+	     A . id,
+		 A .employee_id as "sal.id",
+		 v.login_name as "sal.loginName",
+		 v.name as "sal.name",
+		 v.papers_number as "sal.papersNumber",
+		 A .not_series_salary_items,
+		 A .create_by,
+		 A .create_date,
+		 A .update_by,
+		 A .update_date,
+		 A .del_flag
+    </sql>
+  
+    <sql id="notSeriesSalaryItemsJoins">
+		LEFT JOIN sal_emp_view v on v.id = a.employee_id
+	</sql> 
+	
+    <!--根据用户编号查询用户工作经验信息-->
+    <select id="get" resultType="NotSeriesSalaryItems">
+        SELECT
+	        <include refid="notSeriesSalaryItemsColumns"/>
+	    FROM hr_not_series_salary_items a
+	    <include refid="notSeriesSalaryItemsJoins"/>
+	    WHERE a.employee_id = #{sal.id}
+    </select>   
+    
+    <!-- 分页查询  -->
+    <select id="findList" resultType="NotSeriesSalaryItems">
+		SELECT 
+			<include refid="notSeriesSalaryItemsColumns"/>
+		FROM hr_not_series_salary_items a
+		<include refid="notSeriesSalaryItemsJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	
+	<!-- 查询全部用户信息 -->
+	<select id="findAllList" resultType="NotSeriesSalaryItems">
+		SELECT
+			<include refid="notSeriesSalaryItemsColumns"/>
+		FROM hr_not_series_salary_items a
+		<include refid="notSeriesSalaryItemsJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>	 
+
+    <!--增加用户工作经验信息-->
+    <insert id="insert">
+        INSERT INTO hr_not_series_salary_items(
+             id,
+			 employee_id,
+			 not_series_salary_items,
+			 create_by,
+			 create_date,
+			 update_by,
+			 update_date,
+			 del_flag
+        )VALUES(
+	         #{id},
+			 #{sal.id},
+			 #{notSeriesSalaryItems},
+			 #{createBy.id},
+			 #{createDate},
+			 #{updateBy.id},
+			 #{updateDate},
+			 #{delFlag}
+	    )
+    </insert>
+    
+    <!--更新用户工作经验信息-->
+    <update id="update">
+		UPDATE hr_not_series_salary_items SET 
+			 id=#{id},
+			 employee_id=#{sal.id},
+			 not_series_salary_items=#{notSeriesSalaryItems},
+			 update_by=#{updateBy.id},
+			 update_date=#{updateDate},
+			 del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+    <!--删除用户工作经验信息-->
+    <delete id="delete">
+	   UPDATE hr_not_series_salary_items SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+	
+
+	
+</mapper>

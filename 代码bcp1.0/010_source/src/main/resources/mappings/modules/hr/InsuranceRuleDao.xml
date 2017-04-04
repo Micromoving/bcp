@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.InsuranceRuleDao">
+	<sql id="insuranceRuleColumns">
+		a.id,
+		a.insurance_type,
+		a.unit_proportion,
+		a.people_proportion,
+		a.del_flag
+	</sql>
+
+	<sql id="insuranceRuleJoins">
+	</sql>
+
+	<!--根据用户编号查询用户参保信息 -->
+	<select id="get" resultType="InsuranceRule">
+		SELECT
+		<include refid="insuranceRuleColumns" />
+		FROM hr_insurance_Rule a
+		WHERE a.id = #{id} 
+	</select>
+
+	<!--分页查询 -->
+	<select id="findList" resultType="InsuranceRule">
+		SELECT
+		<include refid="insuranceRuleColumns" />
+		FROM hr_insurance_Rule a
+		<include refid="insuranceRuleJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--全部查询 -->
+	<select id="findAllList" resultType="InsuranceRule">
+		SELECT
+		<include refid="insuranceRuleColumns" />
+		FROM hr_insurance_Rule a
+		<include refid="insuranceRuleJoins" />
+		WHERE a.user_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户参保信息 -->
+	<insert id="insert">
+		INSERT INTO hr_insurance_Rule(
+		id,
+		insurance_type,
+		unit_proportion,
+		people_proportion,
+		del_flag	
+		)VALUES(
+		#{id},
+		#{insuranceType},
+		#{unitProportion},
+		#{peopleProportion},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户参保信息 -->
+	<update id="update">
+		UPDATE hr_insurance_Rule SET
+		id = #{id},
+		insurance_type = #{insuranceType},
+		unit_proportion=#{unitProportion},
+		people_proportion=#{peopleProportion},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 逻辑删除用户参保信息 -->
+	<update id="delete">
+		UPDATE hr_insurance_Rule SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

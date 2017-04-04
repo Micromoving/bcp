@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.AssessmentDao">
+
+
+	<sql id="assessmentColumns">
+		a.id,
+		a.employee_id as "user.id",
+		b.user_no as "employee.userNo",
+		u.name as "user.name",
+		a.assessment_year,
+		a.assessment_level,
+		a.no_checkrise,
+		a.comments,
+		a.del_flag,
+		u.office_id as "office.id"
+
+	</sql>
+
+	<sql id="assessmentJoins">
+		LEFT JOIN hr_user_employee b ON b. ID = A .employee_id
+		LEFT JOIN sys_user U
+		ON u. ID = a.employee_id
+		LEFT JOIN sys_office o on o.id =u.office_id
+	</sql>
+
+	<!--根据用户编号查询用户考核信息 -->
+	<select id="get" resultType="Assessment">
+		SELECT
+		<include refid="assessmentColumns" />
+		FROM hr_assessment a
+
+		<include refid="assessmentJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="Assessment">
+		SELECT
+		<include refid="assessmentColumns" />
+		FROM hr_assessment a
+		<include refid="assessmentJoins" />
+		WHERE a.employee_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+		ORDER BY A .assessment_year DESC
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="Assessment">
+		SELECT
+		<include refid="assessmentColumns" />
+		FROM hr_assessment a
+		<include refid="assessmentJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		order by b.user_no asc
+	</select>
+
+
+
+	<!--根据用户编号与年份 -->
+	<select id="count" resultType="int">
+		SELECT
+		COUNT (*)
+		FROM
+		HR_ASSESSMENT
+		WHERE employee_id = #{user.id}
+		AND assessment_year = #{assessmentYear}
+	</select>
+
+
+	<!--增加用户考核信息 -->
+	<insert id="insert">
+		INSERT INTO hr_assessment(
+		id,
+		employee_id,
+		assessment_year,
+		assessment_level,
+		no_checkrise,
+		comments,
+		del_flag
+		)VALUES(
+		#{id},
+		#{user.id},
+		#{assessmentYear},
+		#{assessmentLevel},
+		#{noCheckrise},
+		#{comments},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户考核信息 -->
+	<update id="update">
+		UPDATE hr_assessment SET
+		id = #{id},
+
+		assessment_year=#{assessmentYear},
+		assessment_level=#{assessmentLevel},
+		no_checkrise=#{noCheckrise},
+		comments=#{comments},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除用户考核信息 -->
+	<update id="delete">
+		delete hr_assessment
+		WHERE id = #{id}
+	</update>
+
+
+
+
+
+
+</mapper>	

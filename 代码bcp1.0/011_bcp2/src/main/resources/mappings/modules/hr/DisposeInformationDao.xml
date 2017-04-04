@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.DisposeInformationDao">
+
+	<sql id="disposeInformationColumns">
+	a.id,
+	a.employee_id as "employee.id",
+	a.disciplinary_categories,
+	a.disciplinary_reasons,
+	a.dispose_start_date,
+	a.dispose_record_description,
+	a.dispose_unit,
+	a.dispose_date,
+	a.dispose_end_date,
+	a.dispose_end_reason,
+	a.del_flag													
+
+	</sql>
+
+	<sql id="disposeInformationJoins">
+
+	</sql>
+
+	<!--根据用户编号查询师德信息（处分信息） -->
+	<select id="get" resultType="DisposeInformation">
+		SELECT
+		<include refid="disposeInformationColumns" />
+		FROM HR_DISPOSE_INFORMATION a
+		<include refid="disposeInformationJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!--分页查询 -->
+	<select id="findList" resultType="DisposeInformation">
+		SELECT
+		<include refid="disposeInformationColumns" />
+		FROM HR_DISPOSE_INFORMATION a
+		<include refid="disposeInformationJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--全部查询 -->
+	<select id="findAllList" resultType="DisposeInformation">
+		SELECT
+		<include refid="disposeInformationColumns"/>
+		FROM HR_DISPOSE_INFORMATION a
+		<include refid="disposeInformationJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户师德信息（处分信息） -->
+	<insert id="insert">
+	INSERT INTO HR_DISPOSE_INFORMATION(
+	id,
+	employee_id,
+	disciplinary_categories,
+	disciplinary_reasons,
+	dispose_start_date,
+	dispose_record_description,
+	dispose_unit,
+	dispose_date,
+	dispose_end_date,
+	dispose_end_reason,
+	del_flag
+	)VALUES(
+	#{id},
+	#{employee.id},
+	#{disciplinaryCategories},
+	#{disciplinaryReasons},
+	#{disposeStartDate},
+	#{disposeRecordDescription},
+	#{disposeUnit},
+	#{disposeDate},
+	#{disposeEndDate},
+	#{disposeEndReason},
+	#{delFlag}
+	)
+	</insert>
+
+	<!-- 更新师德信息（处分信息） -->
+	<update id="update">
+	UPDATE HR_DISPOSE_INFORMATION SET
+	id=#{id},
+	employee_id=#{employee.id},
+	disciplinary_categories=#{disciplinaryCategories},
+	disciplinary_reasons=#{disciplinaryReasons},
+	dispose_start_date=#{disposeStartDate},
+	dispose_record_description=#{disposeRecordDescription},
+	dispose_unit=#{disposeUnit},
+	dispose_date=#{disposeDate},
+	dispose_end_date=#{disposeEndDate},
+	dispose_end_reason=#{disposeEndReason},
+	del_flag=#{delFlag}
+	WHERE id = #{id}
+	</update>
+	
+	<!-- 逻辑删除师德信息（处分信息） -->
+	<update id="delete">
+		UPDATE HR_DISPOSE_INFORMATION SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+</mapper>		

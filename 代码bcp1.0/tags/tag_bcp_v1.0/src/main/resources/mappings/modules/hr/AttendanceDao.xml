@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.AttendanceDao">
+
+
+	<sql id="attendanceColumns">
+		a.id,
+		a.employee_id as "user.id",
+		u.name as "user.name",
+		
+		a.apply_date,
+		a.start_date,
+		a.end_date,
+		a.leave_type,
+		a.leave_reason,
+		a.leave_status,
+		a.report_date,
+		a.process_instance_id as "act.procInsId",
+		a.leave_days,
+		
+		a.del_flag,
+		a.report_people,
+		o.id as "office.id",
+		o.name as "office.name"
+		
+   
+	</sql>
+
+	<sql id="attendanceJoins">
+	left join sys_user u on u.id = a.employee_id
+	left join sys_office o on o.id = u.office_id
+	
+	</sql>
+
+	<!--根据用户编号查询用户考勤信息 -->
+	<select id="get" resultType="Attendance">
+		SELECT
+		<include refid="attendanceColumns" />
+		FROM hr_attendance a
+		<include refid="attendanceJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!-- 根据流程实例ID，取得请假实体记录。 -->
+	<select id="getByProcInsId" resultType="Attendance">
+		SELECT
+		<include refid="attendanceColumns" />
+		FROM hr_attendance a
+		<include refid="attendanceJoins" />
+		WHERE a.process_instance_id = #{act.procInsId}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="Attendance">
+		SELECT
+		<include refid="attendanceColumns" />
+		FROM hr_attendance a
+		<include refid="attendanceJoins" />
+		WHERE  a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 按用户ID查询 -->
+		<if test="user != null and user.id != null and user.id != ''">
+			AND a.employee_id=#{user.id} 			
+		</if>
+			<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="Attendance">
+		SELECT
+		<include refid="attendanceColumns" />
+		FROM hr_attendance a
+		<include refid="attendanceJoins" />
+		WHERE a.employee_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户考勤信息 -->
+	<insert id="insert">
+		INSERT INTO hr_attendance(
+		id,
+		employee_id,
+		apply_date,
+		start_date,
+		end_date,
+		leave_type,
+		leave_reason,
+		leave_status,
+		report_date,
+		process_instance_id,
+		leave_days,
+		del_flag,
+		report_people
+		)VALUES(
+		#{id},
+		#{user.id},
+		#{applyDate},
+		#{startDate},
+		#{endDate},
+		#{leaveType},
+		#{leaveReason},
+		#{leaveStatus},
+		#{reportDate},
+		#{act.procInsId},
+		#{leaveDays},
+		#{delFlag},
+		#{reportPeople}
+		)
+	</insert>
+
+	<!-- 更新用户考勤信息 -->
+	<update id="update">
+		UPDATE hr_attendance SET
+		id = #{id},
+		employee_id = #{user.id},
+		apply_date=#{applyDate},
+		start_date=#{startDate},
+		end_date=#{endDate},
+		leave_type= #{leaveType},
+		leave_reason= #{leaveReason},
+		leave_status=#{leaveStatus},
+		report_date=#{reportDate},
+		leave_days=#{leaveDays},
+		del_flag=#{delFlag},
+		report_people=#{reportPeople}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateProcessInstanceId">
+		UPDATE hr_attendance SET 
+			process_instance_id = #{processInstanceId}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 逻辑删除用户考勤信息 -->
+	<update id="delete">
+		UPDATE hr_attendance SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+</mapper>	

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.AuditRecordsDao">
+
+   
+    <sql id="auditRecordsColumns">
+	    a.id,	
+	    b.apply_date as "attendance.apply_date",
+	    b.start_date as "attendance.start_date",
+	    b.end_date as "attendance.end_date",
+	    b.leave_type as "attendance.leave_type",
+		a.business_key,
+		a.record_id,
+		a.task_key,													
+		a.audit_opinion,													
+		a.update_by,											
+		a.update_date,
+		a.del_flag
+    </sql>
+    
+    <sql id="auditRecordsJoins">
+    LEFT JOIN hr_attendance b ON b.id = a.id
+    </sql>
+  
+    <!--根据用户编号查询用户考核信息-->
+    <select id="get" resultType="AuditRecords">
+        SELECT
+	        <include refid="auditRecordsColumns"/>
+	    FROM hr_audit_records a
+	    WHERE a.id = #{id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+    </select>
+    <!--分页查询-->
+    <select id="findList" resultType="AuditRecords">
+		SELECT
+			<include refid="auditRecordsColumns"/>
+		FROM hr_audit_records a
+		<include refid="auditRecordsJoins"/>
+		WHERE a.record_id = #{id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	<!--全部查询-->
+	<select id="findAllList" resultType="AuditRecords">
+		SELECT
+			<include refid="auditRecordsColumns"/>
+		FROM hr_audit_records a
+		<include refid="auditRecordsJoins"/>
+		WHERE a.user_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+    <!--增加用户考核信息-->
+    <insert id="insert">
+        INSERT INTO hr_audit_records(
+         	id,	
+			business_key,
+			record_id,
+			task_key,
+			audit_opinion,
+			update_by,
+			update_date,
+			del_flag	
+        )VALUES(
+	        #{id},
+            #{businessKey},
+			#{recordId},
+			#{taskKey},
+			#{auditOpinion},
+			#{updateBy.id},
+			#{updateDate},
+		    #{delFlag}
+	    )
+    </insert>
+    
+    <!-- 更新用户考核信息 -->
+    <update id="update">
+		UPDATE hr_audit_records SET 
+			id = #{id},	
+			business_key= #{businessKey},
+			record_id = #{recordId},
+			task_key = #{taskKey},
+			audit_opinion = #{auditOpinion},
+			update_by = #{updateBy},
+			update_date = #{updateDate},
+			del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+
+    
+	
+	<!-- 逻辑删除用户考核信息 -->
+	<update id="delete">
+		UPDATE hr_audit_records SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+</mapper>	

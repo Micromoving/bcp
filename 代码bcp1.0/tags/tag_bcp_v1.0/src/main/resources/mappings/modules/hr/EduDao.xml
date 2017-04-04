@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.EduDao">
+
+
+	<sql id="eduColumns">
+		a.id,
+		a.employee_id as "user.id",
+		u.name as "user.name",
+		b.user_no as "employee.userNo",
+		a.start_date,
+		a.end_date,
+		a.edu_background,
+		a.edu_background_date,
+		a.degree,
+		a.get_degree_date,
+		a.graduate_school,
+		a.specialty,
+		a.research_area,
+		a.study_type,
+		a.is_overseas,
+		a.remarks,
+		a.del_flag
+	</sql>
+
+	<sql id="eduJoins">
+		LEFT JOIN sys_user u ON u.id = a.employee_id
+		LEFT JOIN hr_user_employee b ON b.id = a.employee_id
+	</sql>
+
+	<!--根据用户编号查询用户教育情况信息 -->
+	<select id="get" resultType="Edu">
+		SELECT
+		<include refid="eduColumns" />
+		FROM hr_edu a
+		<include refid="eduJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="Edu">
+		SELECT
+		<include refid="eduColumns" />
+		FROM hr_edu a
+		<include refid="eduJoins" />
+		WHERE a.employee_id = #{user.id}
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="Edu">
+		SELECT
+		<include refid="eduColumns" />
+		FROM hr_edu a
+		<include refid="eduJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		order by b.user_no asc
+	</select>
+
+	<!--增加用户教育情况信息 -->
+	<insert id="insert">
+		INSERT INTO hr_edu(
+		id,
+		employee_id,
+		start_date,
+		end_date,
+		edu_background,
+		edu_background_date,
+		degree,
+		get_degree_date,
+		graduate_school,
+		specialty,
+		research_area,
+		study_type,
+		is_overseas,
+		remarks,
+		del_flag
+		)VALUES(
+		#{id},
+		#{user.id},
+		#{startDate},
+		#{endDate},
+		#{eduBackground},
+		#{eduBackgroundDate},
+		#{degree},
+		#{getDegreeDate},
+		#{graduateSchool},
+		#{specialty},
+		#{researchArea},
+		#{studyType},
+		#{isOverseas},
+		#{remarks},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户教育情况信息 -->
+	<update id="update">
+		UPDATE hr_EDU SET
+		id=#{id},
+		employee_id=#{user.id},
+		start_date=#{startDate},
+		end_date=#{endDate},
+		edu_background=#{eduBackground},
+		edu_background_date=#{eduBackgroundDate},
+		degree=#{degree},
+		get_degree_date=#{getDegreeDate},
+		graduate_school=#{graduateSchool},
+		specialty=#{specialty},
+		research_area=#{researchArea},
+		study_type=#{studyType},
+		is_overseas=#{isOverseas},
+		remarks=#{remarks},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除用户教育情况信息 -->
+	<update id="delete">
+		UPDATE hr_edu SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+
+</mapper>

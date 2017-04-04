@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.AnnualSalaryPersonnelDao">
+
+
+    <sql id="annualSalaryPersonnelColumns">
+    distinct
+	     A . id,
+		 A .employee_id as "salEmpView.id",
+		 v.login_name as "salEmpView.loginName",
+		 A .yearly_salary,
+		 A .create_by as "createBy.id",
+		 A .create_date,
+		 A .update_by as "updateBy.id",
+		 A .update_date,
+		 A .del_flag,
+		 v.name as "salEmpView.name",
+		 v.papers_number as "salEmpView.papersNumber",
+		 v.office_id as "salEmpView.office.id"
+		
+    </sql>
+  
+    <sql id="annualSalaryPersonnelJoins">
+		
+		
+	    LEFT JOIN sal_emp_view v on v.id = a.employee_id
+	    LEFT JOIN sys_office o on o.id = v.office_id
+	    
+	</sql> 
+	
+    <!--根据用户编号查询用户工作经验信息-->
+    <select id="get" resultType="AnnualSalaryPersonnel">
+        SELECT 
+	        <include refid="annualSalaryPersonnelColumns"/>
+	    FROM hr_annual_salary_personnel a
+	    <include refid="annualSalaryPersonnelJoins"/>
+	    WHERE a.id = #{id}
+    </select>   
+    
+    <!--根据用户编号查询用户工作经验信息-->
+    <select id="judge" resultType="AnnualSalaryPersonnel">
+        SELECT
+	        <include refid="annualSalaryPersonnelColumns"/>
+	    FROM hr_annual_salary_personnel a
+	    <include refid="annualSalaryPersonnelJoins"/>
+	    WHERE a.employee_id = #{salEmpView.id}
+	    and a.del_flag = 0
+	    
+    </select>   
+   
+    
+    <!-- 分页查询  -->
+    <select id="findList" resultType="AnnualSalaryPersonnel">
+		SELECT 
+			<include refid="annualSalaryPersonnelColumns"/>
+		FROM hr_annual_salary_personnel a
+		<include refid="annualSalaryPersonnelJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 按姓名查询 -->
+		<if test="salEmpView !=null and salEmpView.name!=null and salEmpView.name!=''">
+			and v.name like
+			<if test="dbName == 'oracle'">'%'||#{salEmpView.name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{salEmpView.name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{salEmpView.name}, '%')</if>
+		</if>
+		<!-- 按部门查询 -->
+		<if
+			test="salEmpView!=null and salEmpView.office!=null and salEmpView.office.id!=null and salEmpView.office.id!=''">
+			and (v.office_id = #{user.office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{salEmpView.office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{salEmpView.office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{salEmpView.office.id}, ',%'))</if>
+		</if>
+		
+	</select>
+	
+	
+	<!-- 查询全部用户信息 -->
+	<select id="findAllList" resultType="AnnualSalaryPersonnel">
+		SELECT
+			<include refid="annualSalaryPersonnelColumns"/>
+		FROM hr_annual_salary_personnel a
+		<include refid="annualSalaryPersonnelJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>	 
+
+    <!--增加用户工作经验信息-->
+    <insert id="insert">
+        INSERT INTO hr_annual_salary_personnel(
+             id,
+			 employee_id,
+			 yearly_salary,
+			 create_by,
+			 create_date,
+			 update_by,
+			 update_date,
+			 del_flag
+        )VALUES(
+	         #{id},
+			 #{salEmpView.id},
+			 #{yearlySalary},
+			 #{createBy.id},
+			 #{createDate},
+			 #{updateBy.id},
+			 #{updateDate},
+			 #{delFlag}
+	    )
+    </insert>
+    
+    <!--更新用户工作经验信息-->
+    <update id="update">
+		UPDATE hr_annual_salary_personnel SET 
+			 id=#{id},
+			 employee_id=#{salEmpView.id},
+			 yearly_salary=#{yearlySalary},
+			 create_by=#{createBy.id},
+			 create_date=#{createDate},
+			 update_by=#{updateBy.id},
+			 update_date=#{updateDate},
+			 del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+    <!--删除用户工作经验信息-->
+    <delete id="delete">
+	   UPDATE hr_annual_salary_personnel SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+	
+
+	
+</mapper>

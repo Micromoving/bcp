@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.TeacherQualificationDao">
+
+
+
+	<sql id="teacherQualificationColumns">
+		a.id,
+		a.employee_id as "user.id",
+		b.name as "user.name",
+		ue.user_no AS "employee.userNo",
+		a.qualifications_type,
+		a.certificate_id,
+		a.gain_date,
+		a.auditing_status,
+		a.auditing_date,
+		a.comments,
+		a.del_flag,
+		a.certifying_body,
+		a.application_unit
+
+	</sql>
+
+    <sql id="teacherQualificationJoins">
+  	  	LEFT JOIN sys_user b ON b.id = a.employee_id
+  	  	LEFT JOIN HR_USER_EMPLOYEE ue ON ue. ID = A .EMPLOYEE_ID
+    </sql>
+
+	<!--根据用户编号查询用户高校资格认定信息 -->
+	<select id="get" resultType="TeacherQualification">
+		SELECT
+		<include refid="teacherQualificationColumns" />
+		FROM hr_teacher_qualification a
+		<include refid="teacherQualificationJoins" />
+		WHERE a.id = #{id}
+	</select>
+	
+	<!--根据用户ID查询用户高校资格认定信息 -->
+	<select id="getId" resultType="TeacherQualification">
+		SELECT
+		<include refid="teacherQualificationColumns" />
+		FROM hr_teacher_qualification a
+		<include refid="teacherQualificationJoins" />
+		WHERE a.employee_id = #{user.id}
+	</select>
+	
+	<!--分页查询 -->
+	<select id="findList" resultType="TeacherQualification">
+		SELECT
+		<include refid="teacherQualificationColumns" />
+		FROM hr_teacher_qualification a
+		<include refid="teacherQualificationJoins" />
+		WHERE a.employee_id = #{user.id} AND  a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="TeacherQualification">
+		SELECT
+		<include refid="teacherQualificationColumns" />
+		FROM hr_teacher_qualification a
+		<include refid="teacherQualificationJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		order by ue.user_no asc
+	</select>
+
+	<!--增加用户高校资格认定信息 -->
+	<insert id="insert">
+		INSERT INTO hr_teacher_qualification(
+		id,
+		employee_id,
+		qualifications_type,
+		certificate_id,
+		gain_date,
+		auditing_status,
+		auditing_date,
+		comments,
+		del_flag,
+		certifying_body,
+		application_unit
+		)VALUES(
+		#{id},
+		#{user.id},
+		#{qualificationsType},
+		#{certificateId},
+		#{gainDate},
+		#{auditingStatus},
+		#{auditingDate},
+		#{comments},
+		#{delFlag},
+		#{certifyingBody},
+		#{applicationUnit}
+		)
+	</insert>
+
+	<!-- 更新用户高校资格认定信息 -->
+	<update id="update">
+		UPDATE hr_teacher_qualification SET
+		id = #{id},
+		employee_id = #{user.id},
+		qualifications_type=#{qualificationsType},
+		certificate_id=#{certificateId},
+		gain_date=#{gainDate},
+		auditing_status=#{auditingStatus},
+		auditing_date=#{auditingDate},
+		comments=#{comments},
+		del_flag=#{delFlag},
+		certifying_body=#{certifyingBody},
+		application_unit=#{applicationUnit}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除用户高校资格认定信息 -->
+	<update id="delete">
+		UPDATE hr_teacher_qualification SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+</mapper>

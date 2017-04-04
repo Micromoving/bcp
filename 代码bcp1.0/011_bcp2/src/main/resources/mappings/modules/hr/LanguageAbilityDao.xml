@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.LanguageAbilityDao">
+	<sql id="languageAbilityColumns">
+		a.id,
+		a.employee_id as "employee.id",
+		a.languages,
+		a.master_degree,
+		a.del_flag
+		
+	</sql>
+
+	<sql id="languageAbilityJoins">
+
+	</sql>
+
+	<!-- 根据编号获得语言能力 -->
+	<select id="get" resultType="LanguageAbility">
+		SELECT
+		<include refid="languageAbilityColumns" />
+		FROM hr_Language_ability a
+		<include refid="languageAbilityJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询-->
+	<select id="findList" resultType="LanguageAbility">
+		SELECT
+		<include refid="languageAbilityColumns" />
+		FROM hr_Language_ability a
+		<include refid="languageAbilityJoins" />
+
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+
+
+	</select>
+
+	<!-- 查询全部用户 -->
+	<select id="findAllList" resultType="LanguageAbility">
+		SELECT
+		<include refid="languageAbilityColumns" />
+		FROM hr_Language_ability a
+		<include refid="languageAbilityJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+
+	</select>
+
+	<!-- 增加用户语言能力 -->
+	<insert id="insert">
+		INSERT INTO hr_Language_ability(
+		id,
+		employee_id,
+		languages,
+		master_degree,
+		del_flag
+        )VALUES(
+		#{id},
+		#{employee.id},
+		#{languages},
+		#{masterDegree},
+		#{delFlag}
+
+		)
+	</insert>
+
+	<!--更新用户语言能力 -->
+	<update id="update">
+		UPDATE hr_Language_ability SET
+		id=#{id},
+		employee_id=#{employee.id},
+		languages=#{languages},
+		master_degree=#{masterDegree},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+	<!--删除用户语言能力 -->
+	<delete id="delete">
+		UPDATE hr_Language_ability SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

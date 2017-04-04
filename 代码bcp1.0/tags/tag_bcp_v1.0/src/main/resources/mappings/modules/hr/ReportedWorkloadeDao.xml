@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.ReportedWorkloadeDao">
+
+
+	<sql id="reportedWorkloadeColumns">
+		A . ID,
+		u.name as "user.name",
+		u.id as "user.id",
+		u.login_name as "user.loginName",
+		u.login_name,
+		u.name,
+		u.office_id as
+		"user.office.id",
+		o.name as "user.office.name",
+		A .report_record_id AS
+		"reportRecord.id",
+		r.year_month AS "reportRecord.yearMonth",
+		r.update_date AS "reportRecord.updateDate",
+		A .employee_id AS
+		"user.id",
+		A .workload,
+		A .del_flag,
+		o.id as "office.id",
+		o.name as
+		"office.name"
+
+	</sql>
+
+	<sql id="reportedWorkloadeJoins">
+		LEFT JOIN hr_report_record r ON r. ID = A .report_record_id
+		LEFT JOIN sys_user u ON u.ID = A .employee_id
+		LEFT JOIN sys_office o on
+		o.id = u.office_id
+	</sql>
+
+	<!--根据用户编号查询用户教育情况信息 -->
+	<select id="get" resultType="ReportedWorkloade">
+		SELECT
+		<include refid="reportedWorkloadeColumns" />
+		FROM hr_reported_workloade a
+		<include refid="reportedWorkloadeJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="ReportedWorkloade">
+		SELECT
+		<include refid="reportedWorkloadeColumns" />
+		FROM hr_reported_workloade a
+		<include refid="reportedWorkloadeJoins" />
+		WHERE
+		a.del_flag = #{DEL_FLAG_NORMAL}
+
+		<if test="user!=null and user.name!=null and user.name!=''">
+			and u.name like
+			<if test="dbName == 'oracle'">'%'||#{user.name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{user.name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{user.name}, '%')</if>
+		</if>
+		<if
+			test="user!=null and user.office!=null and user.office.id!=null and user.office.id!=''">
+			and (u.office_id = #{user.office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{user.office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{user.office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{user.office.id}, ',%'))</if>
+		</if>
+		<if
+			test="reportRecord!=null and reportRecord.id!=null and reportRecord.id!=''">
+			and A .report_record_id = #{reportRecord.id}
+		</if>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="ReportedWorkloade">
+		SELECT
+		<include refid="reportedWorkloadeColumns" />
+		FROM hr_reported_workloade a
+		<include refid="reportedWorkloadeJoins" />
+		WHERE
+		a.del_flag = #{DEL_FLAG_NORMAL}
+		and r.data_classification=2
+	</select>
+
+	<!--根据用户编号与年份 -->
+	<select id="count" resultType="int">
+		SELECT
+		COUNT (*)
+		FROM
+		HR_REPORTED_WORKLOADE a
+		<include refid="reportedWorkloadeJoins" />
+		WHERE r.year_month = #{reportRecord.yearMonth}
+	</select>
+
+	<!--计算工作量 -->
+	<select id="sumWorkHalfYear" resultType="Integer">
+
+		SELECT
+		nvl(sum(WORK.WORKLOAD),0) as sum_Work
+		
+		FROM HR_REPORTED_WORKLOADE WORK
+		left join HR_REPORT_RECORD r on r.id=work.report_record_id
+		
+		WHERE
+		WORK.EMPLOYEE_ID =#{id}
+		and r.YEAR_MONTH>#{reportRecord.yearMonth}
+
+
+	</select>
+
+
+	<!--增加用户教育情况信息 -->
+	<insert id="insert">
+		INSERT INTO hr_reported_workloade(
+		id,
+		report_record_id,
+		employee_id,
+		workload,
+		del_flag
+		)VALUES(
+		#{id},
+		#{reportRecord.id},
+		#{user.id},
+		#{workload},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户教育情况信息 -->
+	<update id="update">
+		UPDATE hr_reported_workloade SET
+		id=#{id},
+		report_record_id=#{reportRecord.id},
+		employee_id=#{user.id},
+		workload=#{workload},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除用户教育情况信息 -->
+	<update id="delete">
+		UPDATE hr_reported_workloade SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+
+	<update id="deleteByReportId">
+		delete from hr_reported_workloade
+		where
+		report_record_id=#{reportRecord.id}
+	</update>
+
+
+
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.WarmDao">
+
+
+	<sql id="warmColumns">
+		a.id,
+		a.plan_id as "salaryPlan.id",
+		a.post_type,
+		a.classify,
+		a.charge_standard,
+		a.del_flag
+
+	</sql>
+
+	<sql id="warmJoins">
+		LEFT join hr_salary_plan p on p.id =a.plan_id
+	</sql>
+
+	<!--根据用户编号查询用户教育情况信息 -->
+	<select id="get" resultType="Warm">
+		SELECT
+		<include refid="warmColumns" />
+		FROM hr_warm a
+		<include refid="warmJoins" />
+		WHERE a.id=#{id}
+	</select>
+	<!--根据用户view查询取暖标准 -->
+	<select id="getWarmStandard" resultType="Warm">
+		SELECT
+		<include refid="warmColumns" />
+		FROM hr_warm a
+		<include refid="warmJoins" />
+		WHERE p.plan_status=1
+		and 
+		a.del_flag = #{DEL_FLAG_NORMAL} 
+		<!-- 按岗位类型（postType）查询 -->
+		<if test="postType != null and postType != ''">
+			AND a.post_type =#{postType}
+		</if>
+		<!-- 按分类（classify）查询 。包括职级，岗位等级-->
+		<if test="classify != null and classify != ''">
+			AND a.classify =#{classify}
+		</if>
+		
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="Warm">
+		SELECT
+		<include refid="warmColumns" />
+		FROM hr_warm a
+		<include refid="warmJoins" />
+		WHERE 
+		a.del_flag = #{DEL_FLAG_NORMAL} 
+		<!-- 按postType查询 -->
+		<if test="postType != null and postType != ''">
+			AND a.post_type =#{postType}
+		</if>
+		<if test="salaryPlan != null and salaryPlan.id!=null and salaryPlan.id  !=''">
+			AND a.plan_id = #{salaryPlan.id}
+		</if>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.classify
+			</otherwise>
+		</choose>
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="Warm">
+		SELECT
+		<include refid="warmColumns" />
+		FROM hr_warm a
+		<include refid="warmJoins" />
+		WHERE 
+		a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户教育情况信息 -->
+	<insert id="insert">
+		INSERT INTO hr_warm(
+		id,
+		plan_id,
+		post_type,
+		classify,
+		charge_standard,
+		del_flag
+		)VALUES(
+		#{id},
+		#{salaryPlan.id},
+		#{postType},
+		#{classify},
+		#{chargeStandard},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户教育情况信息 -->
+	<update id="update">
+		UPDATE hr_warm SET
+		id=#{id},
+		plan_id=#{salaryPlan.id},
+        post_type = #{postType},
+        classify = #{classify},
+        charge_standard = #{chargeStandard},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除用户教育情况信息 -->
+	<update id="delete">
+		UPDATE hr_warm SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+	<!-- 逻辑删除信息(按工资方案删除) -->
+	<update id="deleteByPlanId">
+		UPDATE hr_warm SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE plan_id = #{id}
+	</update>
+
+</mapper>

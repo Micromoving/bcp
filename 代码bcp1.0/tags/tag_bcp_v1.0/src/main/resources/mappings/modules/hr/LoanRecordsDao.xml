@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.LoanRecordsDao">
+
+   
+    <sql id="loanRecordsColumns">
+	    a.id,	
+		a.business_id,
+		a.record_id,
+		a.loan_type,
+		a.employee_id,
+		a.loan_date,
+		a.loan,
+		a.comments,													
+		a.del_flag
+		
+    </sql>
+    
+    <sql id="loanRecordsJoins">
+    </sql>
+  
+    <!--根据用户编号查询用户考核信息-->
+    <select id="get" resultType="loanRecords">
+        SELECT
+	        <include refid="loanRecordsColumns"/>
+	    FROM hr_loanRecords a
+	    WHERE a.id = #{id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+    </select>
+    <!--分页查询-->
+    <select id="findList" resultType="loanRecords">
+		SELECT
+			<include refid="loanRecordsColumns"/>
+		FROM hr_loanRecords a
+		<include refid="loanRecordsJoins"/>
+		WHERE a.record_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>    
+	<!--全部查询-->
+	<select id="findAllList" resultType="loanRecords">
+		SELECT
+			<include refid="loanRecordsColumns"/>
+		FROM hr_loanRecords a
+		<include refid="loanRecordsJoins"/>
+		WHERE a.user_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+    <!--增加用户考核信息-->
+    <insert id="insert">
+        INSERT INTO hr_loanRecords(
+         	id,	
+			business_id,
+			record_id,
+			loan_type,
+			employee_id,
+			loan_date,
+			loan,
+			comments,
+			del_flag	
+        )VALUES(
+	        #{id},
+            #{businessId},
+			#{recordId},
+			#{loanType},
+			#{employeeId},
+			#{loanDate},
+			#{loan},
+			#{comments},
+		    #{delFlag}
+	    )
+    </insert>
+    
+    <!-- 更新用户考核信息 -->
+    <update id="update">
+		UPDATE hr_loanRecords SET 
+			id = #{id},	
+			business_id = #{businessId},
+			record_id = #{recordId},
+			loan_type = #{loanType},
+			employee_id = #{employeeId},
+			loan_date = #{loanDate},
+			loan = #{loan},
+			comments = #{comments},
+			del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+
+    
+	
+	<!-- 逻辑删除用户考核信息 -->
+	<update id="delete">
+		UPDATE hr_loanRecords SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+</mapper>	

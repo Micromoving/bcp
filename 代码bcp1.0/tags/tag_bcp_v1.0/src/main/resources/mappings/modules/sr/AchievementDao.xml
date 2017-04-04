@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.sr.dao.AchievementDao">
+
+
+	<sql id="achievementColumns">
+		u.office_id as "office.id",
+        a.id,
+		a.achievement_id,
+		a.achievement_name,
+		a.employee_id,
+		a.achievement_source,
+		a.achievement_type,
+		a.publish_scope,
+		a.foreign_language,
+		a.research_type,
+		a.submit,
+		a.adopt,
+		a.subject_category,
+		a.secondary_subject,
+		a.use_unit,
+		a.use_date,
+		a.achievement_english_name,
+		a.project,
+		a.issue_code,
+		a.keyword,
+		a.english_keyword,
+		a.achievement_quote,
+		a.achievement_words,
+		a.achievement_summary,
+		a.update_by,
+		a.create_by,
+		a.update_date,
+		a.create_date,
+		a.del_flag
+	</sql>
+
+	<sql id="achievementJoins">
+	    LEFT JOIN sys_user b ON b.id = a.employee_id
+	    LEFT JOIN sys_user U ON u. ID = b.user_no
+		LEFT JOIN sys_office o on o.id =u.office_id
+	</sql>
+
+	<!--根据用户编号查询用户考核信息 -->
+	<select id="get" resultType="Achievement">
+		SELECT
+		<include refid="achievementColumns" />
+		FROM sr_achievement a
+
+		<include refid="achievementJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="Achievement">
+		SELECT
+		<include refid="achievementColumns" />
+		FROM sr_achievement a
+		<include refid="achievementJoins" />
+		WHERE a.employee_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="Achievement">
+		SELECT
+		<include refid="achievementColumns" />
+		FROM sr_achievement a
+		<include refid="achievementJoins" />
+		WHERE a.employee_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户考核信息 -->
+	<insert id="insert">
+		INSERT INTO sr_achievement(
+		id,
+		achievement_id,
+		achievement_name,
+		employee_id,
+		achievement_source,
+		achievement_type,
+		publish_scope,
+		foreign_language,
+		research_type,
+		submit,
+		adopt,
+		subject_category,
+		secondary_subject,
+		use_unit,
+		use_date,
+		achievement_english_name,
+		project,
+		issue_code,
+		keyword,
+		english_keyword,
+		achievement_quote,
+		achievement_words,
+		achievement_summary,
+		update_by,
+		create_by,
+		update_date,
+		create_date,
+		del_flag
+		)VALUES(
+		#{id},
+		#{achievementId},
+		#{achievementName},
+		#{employeeId},
+		#{achievementSource},
+		#{achievementType},
+		#{publishScope},
+		#{foreignLanguage},
+		#{researchType},
+		#{submit},
+		#{adopt},
+		#{subjectCategory},
+		#{secondarySubject},
+		#{useUnit},
+		#{useDate},
+		#{achievementEnglishName},
+		#{project},
+		#{issueCode},
+		#{keyword},
+		#{englishKeyword},
+		#{achievementQuote},
+		#{achievementWords},
+		#{achievementSummary},
+		#{updateBy},
+		#{createBy},
+		#{updateDate},
+		#{createDate},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户考核信息 -->
+	<update id="update">
+		UPDATE sr_achievement SET
+		id = #{id},
+		achievement_id = #{achievementId},
+		achievement_name = #{achievementName},
+		employee_id = #{employeeId},
+		achievement_source = #{achievementSource},
+		achievement_type = #{achievementType},
+		publish_scope = #{publishScope},
+		foreign_language = #{foreignLanguage},
+		research_type = #{researchType},
+		submit = #{submit},
+		adopt = #{adopt},
+		subject_category = #{subjectCategory},
+		secondary_subject = #{secondarySubject},
+		use_unit = #{useUnit},
+		use_date = #{useDate},
+		achievement_english_name = #{achievementEnglishName},
+		project = #{project},
+		issue_code = #{issueCode},
+		keyword = #{keyword},
+		english_keyword = #{englishKeyword},
+		achievement_quote = #{achievementQuote},
+		achievement_words = #{achievementWords},
+		achievement_summary = #{achievementSummary},
+		update_by = #{updateBy},
+		create_by = #{createBy},
+		update_date = #{updateDate},
+		create_date = #{createDate},
+		del_flag = #{delFlag} 
+	</update>
+
+
+
+	<!-- 逻辑删除用户考核信息 -->
+	<update id="delete">
+		UPDATE sr_achievement SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+</mapper>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.PersonnelAgencyDao">
+	<sql id="PersonnelAgencyColumns">
+
+		a.id,
+		a.employee_id as "user.id",
+		b.user_no as "employee.userNo",
+		u.name as "user.name",
+		a.archives_is_complete,
+	    a.missing_material,
+		a.archives_list,
+		a.comments,
+		a.del_flag
+
+	</sql>
+
+	<sql id="PersonnelAgencyJoins">
+	   LEFT JOIN hr_user_employee b ON b. ID = A .employee_id
+ 	   LEFT JOIN sys_user u on u.id = a.employee_id
+ 	   LEFT JOIN sys_office o on o.id = u.office_id
+	</sql>
+
+	<!--根据用户编号查询用户档案信息 -->
+	<select id="get" resultType="PersonnelAgency">
+		SELECT
+		<include refid="PersonnelAgencyColumns" />
+		FROM HR_PERSONNEL_AGENCY a
+		<include refid="PersonnelAgencyJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!--查询全部用户档案信息 -->
+	<select id="findAllList" resultType="PersonnelAgency">
+		SELECT
+		<include refid="PersonnelAgencyColumns" />
+		FROM HR_PERSONNEL_AGENCY a
+		<include refid="PersonnelAgencyJoins" />
+		WHERE  a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		order by b.user_no asc
+	</select>
+
+	<!--分页查询用户档案信息 -->
+	<select id="findList" resultType="PersonnelAgency">
+		SELECT
+		<include refid="PersonnelAgencyColumns" />
+		FROM HR_PERSONNEL_AGENCY a
+		<include refid="PersonnelAgencyJoins" />
+		WHERE a.employee_id = #{user.id}
+		<!-- 数据范围过滤 -->
+		<!-- ${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.employee_id
+			</otherwise>
+		</choose>  -->
+	</select>
+
+	<!-- 插入档案信息 -->
+	<insert id="insert">
+		INSERT INTO HR_PERSONNEL_AGENCY(
+		id,
+		employee_id,
+		archives_is_complete,
+	    missing_material,
+		archives_list,
+		comments,
+		del_flag)
+		VALUES(
+		#{id},
+		#{user.id},
+		#{archivesIsComplete},
+		#{missingMaterial},
+		#{archivesList},
+		#{comments},
+		#{delFlag}
+		)
+	</insert>
+
+	<!--更新用户职员档案信息 -->
+	<update id="update">
+		UPDATE HR_PERSONNEL_AGENCY SET
+		id=#{id},
+		employee_id=#{user.id},
+		archives_is_complete=#{archivesIsComplete},
+		missing_material=#{missingMaterial},
+		archives_list=#{archivesList},
+		comments=#{comments},
+		del_flag=#{delFlag}
+		WHERE
+		id = #{id}
+	</update>
+
+	<!--删除用户职员档案信息 -->
+	<update id="delete">
+		UPDATE HR_PERSONNEL_AGENCY SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+</mapper>

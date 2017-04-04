@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.DutyDao">
+
+
+	<sql id="dutyColumns">
+		a .id,
+		a .plan_id as "salaryPlan.id",
+		a .duty_type,
+		a.
+		charge_standard,
+		a .del_flag
+	</sql>
+
+	<sql id="dutyJoins">
+		LEFT JOIN hr_salary_plan p ON p.id=a.plan_id
+	</sql>
+
+	<!--根据用户编号查询值班信息 -->
+	<select id="get" resultType="Duty">
+		SELECT
+		<include refid="dutyColumns" />
+		FROM hr_duty a
+		<include refid="dutyJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="Duty">
+		SELECT
+		<include refid="dutyColumns" />
+		FROM hr_duty a
+		<include refid="dutyJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if
+			test="salaryPlan != null and salaryPlan.id!=null and salaryPlan.id  !=''">
+			AND a.plan_id = #{salaryPlan.id}
+		</if>
+		<if test="dutyType !=null and dutyType != ''">
+			AND duty_type =#{dutyType}
+		</if>
+
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="Duty">
+		SELECT
+		<include refid="dutyColumns" />
+		FROM hr_duty a
+		<include refid="dutyJoins" />
+		WHERE a.plan_id=#{salaryPlan.id}
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加值班信息 -->
+	<insert id="insert">
+		INSERT INTO hr_duty(
+		id,
+		plan_id ,
+		duty_type,
+		charge_standard,
+		del_flag
+		)VALUES(
+		#{id},
+		#{salaryPlan.id},
+		#{dutyType},
+		#{chargeStandard},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新值班信息 -->
+	<update id="update">
+		UPDATE hr_duty SET
+		id=#{id},
+		plan_id= #{salaryPlan.id},
+		duty_type=#{dutyType},
+		charge_standard=#{chargeStandard},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除值班信息 -->
+	<update id="delete">
+		UPDATE hr_duty SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+	<!-- 逻辑删除值班信息(按工资方案删除) -->
+	<update id="deleteByPlanId">
+		UPDATE hr_duty SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE
+		plan_id = #{id}
+	</update>
+
+</mapper>

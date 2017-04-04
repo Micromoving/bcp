@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.RetireDao">
+
+	<sql id="retireColumns">
+	    a.id,
+		a.employee_id,
+		a.gender,
+		a.nation,
+		a.native_place,
+		a.birth_date,
+		a.retire_type,
+		a.retire_position,
+		a.retire_station,
+		a.treatment,
+		a.office_id,
+		a.retire_date,
+		a.in_work_date,
+		a.politics_status,
+		a.joined_date,
+		a.edu_background,
+		a.degree,
+		a.tech_position,
+		a.physical_condition,
+		a.selfcare_ability,
+		a.is_living_along,
+		a.spouse_status,
+		a.address,
+		a.amply_place,
+		a.dorm_area,
+		a.die_date,
+		a.del_flag
+	</sql>
+	
+	<sql id="retireJoins">
+	    LEFT JOIN sys_employee b ON b.id = a.id
+		LEFT JOIN sys_office o ON o.id = b.office_id
+		LEFT JOIN hr_retire_contact c ON c.id = a.id
+    </sql>
+    
+        <!--根据用户编号查询用户离退休表信息-->
+    <select id="get" resultType="Retire">
+        SELECT
+	        <include refid="retireColumns"/>
+	    FROM hr_retire a
+	    WHERE a.id = #{id}
+    </select>
+    
+	<!-- 全部查询 -->
+     <select id="findAllList" resultType="Retire">
+		SELECT
+			<include refid="retireColumns"/>
+		FROM hr_retire a
+		<include refid="retireJoins"/>
+		WHERE a.employee_id = #{employee.id}
+		ORDER BY a.retire_date
+	</select>
+  
+    <!-- 分页查询 -->
+    <select id="findList" resultType="Retire">
+		SELECT
+			<include refid="retireColumns"/>
+		FROM hr_retire a
+		<include refid="retireJoins"/>
+		WHERE a.employee_id = #{employee.id}
+		<!-- 数据范围过滤 -->
+    ${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.retire_date
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	    <!--增加用户离退休表信息-->
+    <insert id="insert">
+        INSERT INTO hr_retire(
+        	id,
+			employee_id,
+			gender,
+			nation,
+			native_place,
+			birth_date,
+			retire_type,
+			retire_position,
+			retire_station,
+			treatment,
+			office_id,
+			retire_date,
+			in_work_date,
+			politics_status,
+			joined_date,
+			edu_background,
+			degree,
+			tech_position,
+			physical_condition,
+			selfcare_ability,
+			is_living_along,
+			spouse_status,
+			address,
+			amply_place,
+			dorm_area,
+			die_date,
+			del_flag
+        )VALUES(
+	        #{id},
+		    #{employee.id},
+		    #{gender},
+			#{nation},
+			#{nativePlace},
+			#{birthDate},
+			#{retireType},
+			#{retirePosition},
+			#{retireStation},
+			#{treatment},
+			#{officeId},
+			#{retireDate},
+			#{inWorkDate},
+			#{politicsStatus},
+			#{joinedDate},
+			#{eduBackground},
+			#{degree},
+			#{techPosition},
+			#{physicalCondition},
+			#{selfcareAbility},
+			#{isLivingAlong},
+			#{spouseStatus},
+			#{address},
+			#{amplyPlace},
+			#{dormArea},
+			#{dieDate},
+		    #{delFlag}
+	    )
+    </insert>
+    
+    <!-- 更新用户离退休表信息 -->
+    <update id="update">
+		UPDATE hr_retire SET 
+			id = #{id},
+			employee_id = #{employee.id},
+			gender = #{gender},
+			nation = #{nation},
+			native_place = #{nativePlace},
+			birth_date = #{birthDate},
+			retire_type = #{retireType},
+			retire_position = #{retirePosition},
+			retire_station = #{retireStation},
+			treatment = #{treatment},
+			office_id = #{officeId},
+			retire_date = #{retireDate},
+			in_work_date = #{inWorkDate},
+			politics_status = #{politicsStatus},
+			joined_date = #{joinedDate},
+			edu_background = #{eduBackground},
+			degree = #{degree},
+			tech_position = #{techPosition},
+			physical_condition = #{physicalCondition},
+			selfcare_ability = #{selfcareAbility},
+			is_living_along = #{isLivingAlong},
+			spouse_status = #{spouseStatus},
+			address = #{address},
+			amply_place = #{amplyPlace},
+			dorm_area = #{dormArea},
+			die_date = #{dieDate},
+			a.del_flag=#{delFlag}	
+		WHERE id = #{id}
+	</update>
+
+	<!-- 逻辑删除离退休表信息 -->
+	<update id="delete">
+		UPDATE hr_retire SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+		    
+	</mapper>

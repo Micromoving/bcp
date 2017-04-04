@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.PracticeDao">
+
+
+    <sql id="practiceColumns">
+	    a.id,
+		a.user_id,
+		a.start_date,
+		a.end_date,
+		a.practice_name,
+		a.remarks
+    </sql>
+    
+      <sql id="practiceJoins">
+    </sql>
+  
+    <!--根据用户编号查询用户实践经验信息-->
+    <select id="get" resultType="Practice">
+        SELECT
+	        <include refid="practiceColumns"/>
+	    FROM sys_practice_experience a
+	    WHERE a.id = #{id}
+    </select>
+    
+    <!--查询全部用户信息-->
+    <select id="findAllList" resultType="Practice">
+		SELECT
+			<include refid="practiceColumns"/>
+		FROM sys_practice_experience a
+		<include refid="practiceJoins"/>
+		WHERE a.user_id = #{user.id}
+		ORDER BY a.end_date
+	</select>
+	
+	 <!--分页查询用户信息-->
+    <select id="findList" resultType="Practice">
+		SELECT
+			<include refid="practiceColumns"/>
+		FROM sys_practice_experience a
+		<include refid="practiceJoins"/>
+		WHERE a.user_id = #{user.id}
+		<!-- 数据范围过滤 -->
+    ${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.end_date
+			</otherwise>
+		</choose>
+	</select>
+
+    <!--增加用户实践经验信息-->
+    <insert id="insert">
+        INSERT INTO sys_practice_experience(
+            id,
+		    user_id,
+		    start_date,
+		    end_date,
+		    practice_name,
+		    remarks
+        )VALUES(
+	        #{id},
+		    #{user.id},
+		    #{startDate},
+		    #{endDate},
+		    #{practiceName},
+		    #{remarks}
+	    )
+    </insert>
+    
+    <!--更新用户实践经验信息-->
+    <update id="update">
+		UPDATE sys_practice_experience SET 
+			id = #{id},
+            user_id = #{user.id},
+		    start_date = #{startDate},
+		    end_date = #{endDate},
+		    practice_name = #{practiceName},
+		    remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+    <!--删除用户实践经验信息-->
+    <delete id="delete">
+	    DELETE FROM sys_practice_experience WHERE id = #{id}
+	</delete>
+		
+</mapper>	

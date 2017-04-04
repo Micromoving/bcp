@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SalaryInstanceDao">
+
+	<sql id="salaryInstanceColumns">
+		a.id,
+		a.salary_explain,
+		a.year_month,
+		a.data_state,
+		a.del_flag,
+		a.create_by AS "createBy.id",
+		a.create_date,
+		a.process_instance_id as "act.procInsId",
+		a.update_by as "updateBy.id",
+		a.update_date,
+		a.reference_workLoade,
+		a.remarks,
+		a.special_personnel_workLoade
+	</sql>
+
+	<sql id="salaryInstanceJoins">
+		
+	</sql>
+
+	<!--根据编号查询安全问题表信息 -->
+	<select id="get" resultType="SalaryInstance">
+		SELECT
+		<include refid="salaryInstanceColumns" />
+		FROM hr_salary_instance a
+		WHERE a.id = #{id}
+	</select>
+	<!-- 根据流程实例ID，取得工资实体记录。 -->
+	<select id="getByProcInsId" resultType="SalaryInstance">
+		SELECT
+		<include refid="salaryInstanceColumns" />
+		FROM hr_salary_instance a
+		<include refid="salaryInstanceJoins" />
+		WHERE a.process_instance_id = #{act.procInsId}
+	</select>
+	
+	<!--分页查询-->
+    <select id="findList" resultType="SalaryInstance">
+		SELECT
+			<include refid="salaryInstanceColumns"/>
+		FROM hr_salary_instance a
+		<include refid="salaryInstanceJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		
+		<!-- 按上报时间查询 -->
+		<if test="yearMonth != null and yearMonth != ''">
+			AND a.year_month like
+			<if test="dbName == 'oracle'">'%'||replace(replace(#{yearMonth},'年',''),'月','')||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{yearMonth}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{yearMonth}, '%')</if>
+		</if>
+		order by a.year_month desc
+	</select>
+	<!--全部查询-->
+	<select id="findAllList" resultType="SalaryInstance">
+		SELECT
+			<include refid="salaryInstanceColumns"/>
+		FROM hr_salary_instance a
+		<include refid="salaryInstanceJoins"/>
+		WHERE   AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加安全问题表信息 -->
+	<insert id="insert">
+		INSERT INTO hr_salary_instance(
+		id,
+		salary_explain,
+		year_month,
+		data_state,
+		process_instance_id,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		remarks,
+		reference_workLoade,
+		special_personnel_workLoade,
+		del_flag
+		)VALUES(
+		#{id},
+		#{salaryExplain},
+		#{yearMonth},
+		#{dataState},
+		#{act.procInsId},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{remarks},
+		#{referenceWorkLoade},
+		#{specialPersonnelWorkLoade},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新安全问题表信息 -->
+	<update id="update">
+		UPDATE hr_salary_instance SET
+			id=#{id},
+			salary_explain = #{salaryExplain},
+			year_month=#{yearMonth},
+			data_state=#{dataState},
+			del_flag=#{delFlag},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			reference_workLoade=#{referenceWorkLoade},
+			special_personnel_workLoade=#{specialPersonnelWorkLoade},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateProcessInstanceId">
+		UPDATE hr_salary_instance SET 
+			process_instance_id = #{processInstanceId}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 逻辑删除安全问题信息 -->
+	<update id="delete">
+		UPDATE hr_salary_instance SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

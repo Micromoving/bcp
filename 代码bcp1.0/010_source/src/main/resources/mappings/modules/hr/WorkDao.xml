@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.WorkDao">
+
+
+    <sql id="workColumns">
+	    a.id,
+		a.user_id,
+		u.name as "user.name",
+		b.user_no as "employee.userNo",
+		a.start_date,
+		a.end_date,
+		a.company_name,
+		a.company_nature,
+		a.company_department,
+		a.position,
+		a.remarks,
+		a.work_sort
+    </sql>
+  
+    <sql id="workJoins">
+      LEFT JOIN sys_user u ON u.id = a.user_id
+		LEFT JOIN hr_user_employee b on b.id = a.user_id
+		LEFT JOIN sys_office o on o.id = u.office_id
+	</sql> 
+	
+    <!--根据用户编号查询用户工作经验信息-->
+    <select id="get" resultType="Work">
+        SELECT
+	        <include refid="workColumns"/>
+	    FROM sys_work_experience a
+	    <include refid="workJoins"/>
+	    WHERE a.id = #{id}
+    </select>   
+    
+    <!-- 分页查询  -->
+    <select id="findList" resultType="Work">
+		SELECT 
+			<include refid="workColumns"/>
+		FROM sys_work_experience a
+		<include refid="workJoins"/>
+		WHERE a.user_id = #{user.id}
+		
+		<!-- 数据范围过滤 -->
+    ${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.end_date
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 查询全部用户信息 -->
+	<select id="findAllList" resultType="Work">
+		SELECT
+			<include refid="workColumns"/>
+		FROM sys_work_experience a
+		<include refid="workJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		order by b.user_no asc
+	</select>	 
+
+    <!--增加用户工作经验信息-->
+    <insert id="insert">
+        INSERT INTO sys_work_experience(
+            id,
+		    user_id,
+		    start_date,
+		    end_date,
+		    company_name,
+		    company_nature,
+		    company_department,
+		    position,
+		    remarks,
+		    work_sort
+        )VALUES(
+	        #{id},
+            #{user.id},
+		    #{startDate},
+		    #{endDate},
+		    #{companyName},
+		    #{companyNature},
+		    #{companyDepartment},
+		    #{position},
+		    #{remarks},
+		    #{workSort}
+	    )
+    </insert>
+    
+    <!--更新用户工作经验信息-->
+    <update id="update">
+		UPDATE sys_work_experience SET 
+			id = #{id},
+		    user_id = #{user.id},
+		    start_date = #{startDate},
+		    end_date = #{endDate},
+		    company_name = #{companyName},
+		    company_nature = #{companyNature},
+		    company_department = #{companyDepartment},
+		    position = #{position},
+		    remarks = #{remarks},
+		    work_sort = #{workSort}
+		WHERE id = #{id}
+	</update>
+
+    <!--删除用户工作经验信息-->
+    <delete id="delete">
+	    DELETE FROM sys_work_experience WHERE id = #{id}
+	</delete>
+	
+
+	
+</mapper>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.TitleDao">
+
+
+    <sql id="titleColumns">
+	    a.id,
+		a.user_id,
+		a.start_date,
+		a.end_date,
+		a.job_name,
+		a.remarks
+    </sql>
+    
+      <sql id="titleJoins">
+    </sql>
+  
+    <!--根据用户编号查询用户校内职务信息-->
+    <select id="get" resultType="Title">
+        SELECT
+	        <include refid="titleColumns"/>
+	    FROM sys_school_title a
+	    WHERE a.id = #{id}
+    </select>
+	
+	<!--分页查询用户信息-->
+    <select id="findAllList" resultType="Title">
+		SELECT
+			<include refid="titleColumns"/>
+		FROM sys_school_title a
+		<include refid="titleJoins"/>
+		WHERE a.user_id = #{user.id}
+		ORDER BY a.end_date
+	</select>
+	
+	<!--查询全部用户信息-->
+    <select id="findList" resultType="Title">
+		SELECT
+			<include refid="titleColumns"/>
+		FROM sys_school_title a
+		<include refid="titleJoins"/>
+		WHERE a.user_id = #{user.id}
+		<!-- 数据范围过滤 -->
+    ${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.end_date
+			</otherwise>
+		</choose>
+	</select>    
+
+    <!--增加用户校内职务信息-->
+    <insert id="insert">
+        INSERT INTO sys_school_title(
+            id,
+		    user_id,
+		    start_date,
+		    end_date,
+		    job_name,
+		    remarks
+        )VALUES(
+	        #{id},
+		    #{user.id},
+		    #{startDate},
+		    #{endDate},
+		    #{jobName},
+		    #{remarks}
+	    )
+    </insert>
+    
+     <!--更新用户校内职务信息-->
+    <update id="update">
+		UPDATE sys_school_title SET 
+			id = #{id},
+		    user_id = #{user.id},
+		    start_date = #{startDate},
+		    end_date = #{endDate},
+		    job_name = #{jobName},
+		    remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+    <!--删除用户校内职务信息-->
+    <delete id="delete">
+	    DELETE FROM sys_school_title WHERE id = #{id}
+	</delete>
+		
+</mapper>	

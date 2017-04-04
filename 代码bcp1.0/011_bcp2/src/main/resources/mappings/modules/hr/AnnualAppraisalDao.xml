@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.AnnualAppraisalDao">
+	<sql id="annualAppraisalColumns">
+		a.id,
+		a.employee_id as "employee.id",
+		a.check_year,
+		a.check_result,
+		a.check_unit,
+		a.not_check_reason,
+		a.comments,
+		a.del_flag,
+		o.id as "employee.office.id",
+		o.name as "employee.office.name",
+		e.name as "employee.name",
+		u.login_name as "user.loginName"
+	</sql>
+
+	<sql id="annualAppraisalJoins">
+		LEFT JOIN hr_employee e on e.id=a.employee_id
+		LEFT JOIN sys_user u on u.id=a.employee_id
+		LEFT JOIN sys_office o on o.id=u.office_id
+	</sql>
+
+	<!--根据用户编号查询用户考核信息 -->
+	<select id="get" resultType="AnnualAppraisal">
+		SELECT
+		<include refid="annualAppraisalColumns" />
+		FROM hr_annual_Appraisal a
+		<include refid="annualAppraisalJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!--分页查询 -->
+	<select id="findList" resultType="AnnualAppraisal">
+		SELECT
+		<include refid="annualAppraisalColumns" />
+		FROM hr_annual_Appraisal a
+		<include refid="annualAppraisalJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	<if test="user!=null and user.name!=null and user.name!=''">
+		and u.name like
+		<if test="dbName == 'oracle'">'%'||#{user.name}||'%'</if>
+		<if test="dbName == 'mssql'">'%'+#{user.name}+'%'</if>
+		<if test="dbName == 'mysql'">CONCAT('%',#{uaer.name}, '%')</if>
+	</if>
+	<!-- 按部门查询 -->
+	<if test="office!=null and office.id !=null and office.id !=''">
+		AND (u.office_id = #{office.id} OR o.parent_ids LIKE
+		<if test="dbName == 'oracle'">'%'||#{office.id}||',%')</if>
+		<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+		<if test="dbName == 'mysql'">CONCAT('%,',#{office.id}, ',%'))</if>
+	</if>
+	<!-- 按年度考核查询-->
+		<if test="checkYear!=null and checkYear!=''">
+		    AND (a.check_year = #{checkYear} )
+		</if>
+		</select>
+
+	<!--全部查询 -->
+	<select id="findAllList" resultType="AnnualAppraisal">
+		SELECT
+		<include refid="annualAppraisalColumns" />
+		FROM hr_check a
+		<include refid="annualAppraisalJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户考核信息 -->
+	<insert id="insert">
+		INSERT INTO hr_Annual_Appraisal(
+		id,
+		employee_id,
+		check_year,
+		check_result,
+		check_unit,
+		not_check_reason,
+		comments,
+		del_flag
+		)VALUES(
+		#{id},
+		#{employee.id},
+		#{checkYear},
+		#{checkResult},
+		#{checkUnit},
+		#{notCheckReason},
+		#{comments},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户考核信息 -->
+	<update id="update">
+		UPDATE hr_annual_Appraisal SET
+		id = #{id},
+		employee_id = #{employee.id},
+		check_year = #{checkYear},
+		check_result = #{checkResult},
+		check_unit = #{checkUnit},
+		not_check_reason = #{notCheckReason},
+		comments = #{comments},
+		del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 逻辑删除用户考核信息 -->
+	<update id="delete">
+		UPDATE hr_annual_Appraisal SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+</mapper>		

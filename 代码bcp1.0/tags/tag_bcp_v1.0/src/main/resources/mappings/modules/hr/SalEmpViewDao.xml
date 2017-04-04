@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SalEmpViewDao">
+
+
+	<sql id="salempViewColumns">
+		a.id,
+		a.name,
+		a.login_name,
+		a.name as "user.name",
+		a.login_name as "user.loginName",
+		a.gender,
+		a.staff_type,
+		a.only_child_end_date,
+		a.incumbency_status,
+		a.in_school_date,
+		a.difference_value,
+		a.performance_level,
+		a.duties,
+		a.post_type,
+		a.post_level,
+		a.professional_level,
+		a.duties_level,
+		a.try_out_date,
+		a.engage_situation,
+		a.end_date,
+		a.max_tech_position_type,
+		a.max_tech_position_level,
+		a.max_edu_background,
+		a.max_degree,
+		a.office_id as "office.id",
+		a.office_name as "office.name",
+		a.office_id as "user.office.id",
+		a.office_name as "user.office.name",
+		a.establishment_situation,
+		a.is_special
+
+	</sql>
+
+	<sql id="salempViewJoins">
+		sys_office o where o. ID = a.office_id
+	</sql>
+
+	<!--根据用户编号查询用户信息 -->
+	<select id="get" resultType="SalEmpView">
+		SELECT
+		<include refid="salempViewColumns" />
+		FROM sal_emp_view a,
+		<include refid="salempViewJoins" />
+		and a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="SalEmpView">
+		SELECT
+		<include refid="salempViewColumns" />
+		FROM sal_emp_view a,
+		<include refid="salempViewJoins" />
+
+		<if test="postType!=null and postType!=''">
+			and a.post_type = #{postType}
+		</if>
+
+		<if test="group!=null and group!= ''">
+			and a.post_type not in (1,4,6)
+		</if>
+
+
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		order by a.login_name asc
+
+	</select>
+
+</mapper>	

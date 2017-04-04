@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.EmployDao">
+	<sql id="employColumns">
+		a.id,
+		a.user_id as "user.id",
+		b.photo as "user.photo",
+		a.declare_position_number,
+		a.post_type,
+		a.name,
+		a.ID_card_number,
+		a.gender,
+		a.birth_date,
+		a.place_Domicile,
+		a.politics_status,
+		a.nation,
+		a.marital_status,
+		a.highest_edu_background,
+		a.highest_degree,
+		a.highest_graduate_school,
+		a.highest_major,
+		a.highest_start_date,
+		a.highest_end_date,
+		a.highest_degree_start_date,
+		a.highest_degree_end_date,
+		a.first_edu_background,
+		a.first_degree,
+		a.first_graduate_school,
+		a.first_major,
+		a.first_start_date,
+		a.first_end_date,
+		a.first_degree_start_date,
+		a.first_degree_end_date,
+		a.is_work_experience,
+		a.working_unit,
+		a.working_post,
+		a.in_work_date,
+		a.qualifications,
+		a.tech_position,
+		a.personal_profile,
+		a.family_status,
+		a.comments,
+		a.auditing_status,
+		a.mobile,
+		a.correspondence_address,
+		a.email,
+		a.fixed_phone,
+		a.apply_date,
+		a.update_date,
+		a.audit_date,
+		a.audit_comments
+	</sql>
+
+	<sql id="employJoins">
+		LEFT JOIN sys_user b ON b.id = a.user_id
+	</sql>
+
+	<!--根据用户编号查询招聘信息 -->
+	<select id="get" resultType="employ">
+		SELECT
+		<include refid="employColumns" />
+		FROM hr_employ a
+		<include refid="employJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--根据用户编号查询招聘信息 -->
+	<select id="getByUser" resultType="employ">
+		SELECT
+		<include refid="employColumns" />
+		FROM hr_employ a
+		<include refid="employJoins" />
+		WHERE a.user_id = #{value}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="employ">
+		SELECT
+		<include refid="employColumns" />
+		FROM hr_employ a
+		<include refid="employJoins" />
+		WHERE 1=1
+
+		<!-- 按姓名查询 -->
+		<if test="name != null and name != ''">
+			AND a.name like
+			<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{name}, '%')</if>
+		</if>
+		<!-- 按申报岗位查询 -->
+		<if test="declarePositionNumber != null and declarePositionNumber != ''">
+			AND a.declare_position_number =#{declarePositionNumber}
+
+		</if>
+		<!-- 按岗位类型查询 -->
+		<if test="postType != null and postType != ''">
+			AND a.post_type =#{postType}
+
+		</if>
+		<!-- 按审核状态查询 -->
+		<if test="auditingStatus != null and auditingStatus != ''">
+			AND a.auditing_status =#{auditingStatus}
+
+		</if>
+		
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.auditing_status asc,a.apply_date asc
+			</otherwise>
+		</choose>
+
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="employ">
+		SELECT
+		<include refid="employColumns" />
+		FROM hr_employ a
+		<include refid="employJoins" />
+		WHERE a.user_id = #{user.id}
+	</select>
+
+	<!--增加招聘信息 -->
+	<insert id="insert">
+		INSERT INTO hr_employ(
+		id,
+		user_id,
+		declare_position_number,
+		post_type,
+		name,
+		ID_card_number,
+		gender,
+		birth_date,
+		place_domicile,
+		politics_status,
+		nation,
+		marital_status,
+		highest_edu_background,
+		highest_degree,
+		highest_graduate_school,
+		highest_major,
+		highest_start_date,
+		highest_end_date,
+		highest_degree_start_date,
+		highest_degree_end_date,
+		first_edu_background,
+		first_degree,
+		first_graduate_school,
+		first_major,
+		first_start_date,
+		first_end_date,
+		first_degree_start_date,
+		first_degree_end_date,
+		is_work_experience,
+		working_unit,
+		working_post,
+		in_work_date,
+		qualifications,
+		tech_position,
+		personal_profile,
+		family_status,
+		comments,
+		auditing_status,
+		mobile,
+		correspondence_address,
+		email,
+		fixed_phone,
+		apply_date,
+		update_date,
+		audit_date,
+		audit_comments
+		)VALUES(
+		#{id},
+		#{user.id},
+		#{declarePositionNumber},
+		#{postType},
+		#{name},
+		#{IDCardNumber},
+		#{gender},
+		#{birthDate},
+		#{placeDomicile},
+		#{politicsStatus},
+		#{nation},
+		#{maritalStatus},
+		#{highestEduBackground},
+		#{highestDegree},
+		#{highestGraduateSchool},
+		#{highestMajor},
+		#{highestStartDate},
+		#{highestEndDate},
+		#{highestDegreeStartDate},
+		#{highestDegreeEndDate},
+		#{firstEduBackground},
+		#{firstDegree},
+		#{firstGraduateSchool},
+		#{firstMajor},
+		#{firstStartDate},
+		#{firstEndDate},
+		#{firstDegreeStartDate},
+		#{firstDegreeEndDate},
+		#{isWorkExperience},
+		#{workingUnit},
+		#{workingPost},
+		#{inWorkDate},
+		#{qualifications},
+		#{techPosition},
+		#{personalProfile},
+		#{familyStatus},
+		#{comments},
+		#{auditingStatus},
+		#{mobile},
+		#{correspondenceAddress},
+		#{email},
+		#{fixedPhone},
+		#{applyDate},
+		#{updateDate},
+		#{auditDate},
+		#{auditComments}
+		)
+	</insert>
+
+	<!-- 更新招聘信息 -->
+	<update id="update">
+		UPDATE hr_employ SET
+		id = #{id},
+		user_id = #{user.id},
+		declare_position_number = #{declarePositionNumber},
+		post_type =
+		#{postType},
+		name = #{name},
+		ID_card_number = #{IDCardNumber},
+		gender =
+		#{gender},
+		birth_date = #{birthDate},
+		place_domicile=#{placeDomicile},
+		politics_status =
+		#{politicsStatus},
+		nation = #{nation},
+		marital_status =
+		#{maritalStatus},
+		highest_edu_background = #{highestEduBackground},
+		highest_degree = #{highestDegree},
+		highest_graduate_school =
+		#{highestGraduateSchool},
+		highest_major = #{highestMajor},
+		highest_start_date = #{highestStartDate},
+		highest_end_date =
+		#{highestEndDate},
+		highest_degree_start_date = #{highestDegreeStartDate},
+		highest_degree_end_date =
+		#{highestDegreeEndDate},
+		first_edu_background = #{firstEduBackground},
+		first_degree = #{firstDegree},
+		first_graduate_school =
+		#{firstGraduateSchool},
+		first_major = #{firstMajor},
+		first_start_date =
+		#{firstStartDate},
+		first_end_date = #{firstEndDate},
+		first_degree_start_date =
+		#{firstDegreeStartDate},
+		first_degree_end_date = #{firstDegreeEndDate},
+		is_work_experience
+		= #{isWorkExperience},
+		working_unit = #{workingUnit},
+		working_post =
+		#{workingPost},
+		in_work_date = #{inWorkDate},
+		qualifications =
+		#{qualifications},
+		tech_position = #{techPosition},
+		personal_profile =
+		#{personalProfile},
+		family_status = #{familyStatus},
+		comments =
+		#{comments},
+		auditing_status = #{auditingStatus},
+		mobile = #{mobile},
+		correspondence_address = #{correspondenceAddress},
+		email = #{email},
+		fixed_phone = #{fixedPhone},
+		apply_date = #{applyDate},
+		update_date =
+		#{updateDate},
+		audit_date = #{auditDate},
+		audit_comments = #{auditComments} 
+		WHERE
+		id=#{id}
+
+	</update>
+
+
+
+	<!-- 逻辑删除招聘信息 -->
+	<update id="delete">
+		UPDATE hr_employ SET
+		WHERE id = #{id}
+	</update>
+
+</mapper>

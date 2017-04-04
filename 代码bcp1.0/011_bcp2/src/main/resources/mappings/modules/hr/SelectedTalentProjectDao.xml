@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SelectedTalentProjectDao">
+	<sql id="selectedTalentProjectColumns">
+		a.ID,
+		a.EMPLOYEE_ID as "employee_id",
+		a.NAME,
+		a.ID_NUMBER,
+		a.PROJECT_NAME,
+		a.YEAR,
+		a.DEL_FLAG,
+		o.id as "employee.office.id",
+		o.name as "employee.office.name",
+		e.name as "employee.name",
+		e.id_number as "employee.idNumber"
+		
+	</sql>
+
+	<sql id="selectedTalentProjectJoins">
+
+		LEFT JOIN hr_employee e on e.id=a.employee_id
+		LEFT JOIN sys_user u on u.id=a.employee_id
+		LEFT JOIN sys_office o on o.id=u.office_id
+	</sql>
+
+	<!-- 根据编号获得入选人才项目 -->
+	<select id="get" resultType="SelectedTalentProject">
+		SELECT
+		<include refid="selectedTalentProjectColumns" />
+		FROM hr_selected_talent_project a
+		<include refid="selectedTalentProjectJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询入选人才项目 -->
+	<select id="findList" resultType="SelectedTalentProject">
+		SELECT
+		<include refid="selectedTalentProjectColumns" />
+		FROM hr_selected_talent_project a
+		<include refid="selectedTalentProjectJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!-- 查询全部入选人才项目 -->
+	<select id="findAllList" resultType="SelectedTalentProject">
+		SELECT
+		<include refid="selectedTalentProjectColumns" />
+		FROM hr_selected_talent_project a
+		<include refid="selectedTalentProjectJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!-- 插入入选人才项目信息 -->
+	<insert id="insert">
+		INSERT INTO hr_selected_talent_project(
+		id,
+		employee_id,
+		name,
+		id_number,
+		project_name,
+		year,
+		del_flag
+		)VALUES(
+		#{id},
+		#{employee.id},
+		#{name},
+		#{idNumber},
+		#{projectName},
+		#{year},
+		#{delFlag}
+		)
+	</insert>
+
+	<!--更新入选人才项目信息 -->
+	<update id="update">
+		UPDATE hr_selected_talent_project SET
+		id=#{id},
+		employee_id= #{employee.id},
+		name=#{name},
+		id_number= #{idNumber},
+		project_name=#{projectName},
+		year=#{year},
+		del_flag=#{delFlag}
+		WHERE id
+		=#{id}
+	</update>
+
+	<!--删除入选人才项目 -->
+	<delete id="delete">
+		UPDATE hr_selected_talent_project SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

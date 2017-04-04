@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.ReportRecordDao">
+
+
+	<sql id="reportRecordColumns">
+		a . id,
+		a .salary_instance_id as "salaryInstance.id",
+		a
+		.data_classification,
+		a .office_id as "office.id",
+		o.name as
+		"office.name",
+		a . year_month,
+		a .update_by as "updateBy.id",
+		u.name as "user.name",
+		a .update_date,
+		a .del_flag,
+		a .data_state,
+		a.process_instance_id,
+		a.process_instance_id as "act.procInsId",
+		a.create_by as "user.id",
+		a.create_date
+	</sql>
+
+	<sql id="reportRecordJoins">
+		LEFT JOIN sys_office o ON o.id=a.office_id
+		LEFT JOIN
+		sys_user u on u.id = a.create_by
+		LEFT JOIN hr_salary_instance s ON
+		s.id=a.salary_instance_id
+	</sql>
+
+	<!--根据用户编号查询上报记录信息 -->
+	<select id="get" resultType="ReportRecord">
+		SELECT
+		<include refid="reportRecordColumns" />
+		FROM hr_report_record a
+		<include refid="reportRecordJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!-- 根据流程实例ID，取得工资实体记录。 -->
+	<select id="getByProcInsId" resultType="ReportRecord">
+		SELECT
+		<include refid="reportRecordColumns" />
+		FROM Hr_report_record a
+		<include refid="reportRecordJoins" />
+		WHERE a.process_instance_id = #{act.procInsId}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="ReportRecord">
+		SELECT
+		<include refid="reportRecordColumns" />
+		FROM hr_report_record a
+		<include refid="reportRecordJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="office!=null and office.id!=null and office.id!=''">
+			and (a.office_id = #{office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+		<if test="dataClassification!=null and dataClassification!=''">
+			and a.data_classification=#{dataClassification}
+		</if>
+		<if test="dataClassification==null or dataClassification==''">
+			and a.data_classification !='4'
+		</if>
+		<if test="yearMonth!=null and yearMonth!= ''">
+			and a.year_month =#{yearMonth}
+		</if>
+		<if
+			test="salaryInstance!=null and salaryInstance!= '' and salaryInstance.id!=null and salaryInstance.id!=''">
+			and a .salary_instance_id =#{salaryInstance.id}
+		</if>
+		order by a.year_month desc
+	</select>
+
+	<!--全部查询 -->
+	<select id="findAllList" resultType="ReportRecord">
+		SELECT
+		<include refid="reportRecordColumns" />
+		FROM hr_report_record a
+		<include refid="reportRecordJoins" />
+		WHERE
+		a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<select id="count" resultType="int">
+		SELECT
+		COUNT (*)
+		FROM
+		hr_report_record r
+		WHERE
+		r.DATA_CLASSIFICATION =#{dataClassification}
+		AND r.YEAR_MONTH = #{yearMonth}
+	</select>
+
+	<!--增加上报记录信息 -->
+	<insert id="insert">
+		INSERT INTO hr_report_record(
+		id,
+		salary_instance_id,
+		data_classification,
+		office_id,
+		year_month,
+		update_by,
+		update_date,
+		del_flag,
+		data_state,
+		process_instance_id,
+		create_by,
+		create_date
+		)VALUES(
+		#{id},
+		#{salaryInstance.id},
+		#{dataClassification},
+		#{office.id},
+		#{yearMonth},
+		#{updateBy.id},
+		#{updateDate},
+		#{delFlag},
+		#{dataState},
+		#{act.procInsId},
+		#{createBy.id},
+		#{createDate}
+		)
+	</insert>
+
+	<!-- 更新上报记录信息 -->
+	<update id="update">
+		UPDATE hr_report_record SET
+		id=#{id},
+		salary_instance_id=#{salaryInstance.id},
+		data_classification=#{dataClassification},
+		office_id=#{office.id},
+		year_month = #{yearMonth},
+		update_by=#{updateBy.id},
+		update_date=#{updateDate},
+		del_flag=#{delFlag},
+		data_state=#{dataState},
+		process_instance_id=#{act.procInsId},
+		create_by=#{createBy.id},
+		create_date=#{createDate}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除上报记录信息 -->
+	<update id="delete">
+		UPDATE hr_report_record SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

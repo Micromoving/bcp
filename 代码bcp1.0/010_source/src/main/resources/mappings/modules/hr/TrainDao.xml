@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.TrainDao">
+	<sql id="TrainColumns">
+	    a.id,
+		a.employee_id as "user.id",
+		a.training_type,													
+		a.training_cycle,													
+		a.is_home,													
+		a.training_agency,													
+		a.training_place,													
+		a.training_course,													
+		a.training_content,													
+		a.start_date,
+		a.end_date,
+		a.training_mode,													
+		a.has_certificate,													
+		a.certificate_id,													
+		a.training_etc,													
+		a.training_funds,													
+		a.funds_origin,													
+		a.leave_date,													
+		a.return_date,													
+		a.loan,													
+		a.loan_date,													
+		a.wipeout,													
+		a.wipeout_date,													
+		a.wipeout_detail,													
+		a.del_flag,
+		e.gender as "employee.gender",
+		b.name as "user.name",
+		b.office_id as "user.office.id",
+		p.name as "proTechPosition.name"
+		</sql>												
+		
+	<sql id="TrainJoins">
+	    LEFT JOIN sys_user b ON b.id = a.employee_id
+		LEFT JOIN sys_office o ON o.id = b.office_id
+		LEFT JOIN hr_user_employee e ON e.id = a .employee_id
+		LEFT JOIN hr_pro_tech_position p ON p.employee_id = a.employee_id
+    </sql>
+    
+        <!--根据用户编号查询用户培训经历表信息-->
+    <select id="get" resultType="Train">
+        SELECT
+	        <include refid="TrainColumns"/>
+	    FROM hr_train_experience a
+	    <include refid="TrainJoins"/>
+	    WHERE a.id = #{id}
+    </select>
+    
+	<!-- 全部查询 -->
+     <select id="findAllList" resultType="Train">
+		SELECT
+			<include refid="TrainColumns"/>
+		FROM hr_train_experience a
+		<include refid="TrainJoins"/>
+		WHERE a.employee_id = #{user.id}
+	</select>
+  
+    <!-- 分页查询 -->
+    <select id="findList" resultType="Train">
+		SELECT
+			<include refid="TrainColumns"/>
+		FROM hr_train_experience a
+		<include refid="TrainJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} 
+	</select>
+	
+	
+	    <!--增加用户培训经历表信息-->
+    <insert id="insert">
+        INSERT INTO hr_train_experience(
+        	id,
+			employee_id,
+			training_type,													
+			training_cycle,													
+			is_home,													
+			training_agency,													
+			training_place,													
+			training_course,													
+			training_content,													
+			start_date,
+			end_date,
+			training_mode,													
+			has_certificate,													
+			certificate_id,													
+			training_etc,													
+			training_funds,													
+			funds_origin,													
+			leave_date,													
+			return_date,													
+			loan,													
+			loan_date,													
+			wipeout,													
+			wipeout_date,													
+			wipeout_detail,													
+			del_flag	
+        )VALUES(
+        	#{id},
+		    #{user.id},
+	        #{trainingType},													
+			#{trainingCycle},												
+			#{isHome},													
+			#{trainingAgency},													
+			#{trainingPlace},													
+			#{trainingCourse},													
+			#{trainingContent},													
+			#{startDate},
+			#{endDate},
+			#{trainingMode},													
+			#{hasCertificate},													
+			#{certificateId},													
+			#{trainingEtc},													
+			#{trainingFunds},													
+			#{fundsOrigin},													
+			#{leaveDate},													
+			#{returnDate},													
+			#{loan},													
+			#{loanDate},													
+			#{wipeout},													
+			#{wipeoutDate},													
+			#{wipeoutDetail},													
+		    #{delFlag}
+	    )
+    </insert>
+    
+    <!-- 更新用户培训经历表信息 -->
+    <update id="update">
+		UPDATE hr_train_experience SET 
+			a.id = #{id},
+			a.employee_id = #{user.id},
+			a.training_type = #{trainingType},												
+			a.training_cycle = #{trainingCycle},												
+			a.is_home = #{isHome},													
+			a.training_agency = #{trainingAgency},													
+			a.training_place = #{trainingPlace},													
+			a.training_course = #{trainingCourse},													
+			a.training_content = #{trainingContent},													
+			a.start_date = #{startDate},
+			a.end_date = #{endDate},
+			a.training_mode = #{trainingMode},													
+			a.has_certificate = #{hasCertificate},													
+			a.certificate_id = #{certificateId},													
+			a.training_etc = #{trainingEtc},													
+			a.training_funds = #{trainingFunds},													
+			a.funds_origin = #{fundsOrigin},												
+			a.leave_date = #{leaveDate},													
+			a.return_date = #{returnDate},													
+			a.loan = #{loan},													
+			a.loan_date = #{loanDate},													
+			a.wipeout = #{wipeout},														
+			a.wipeout_date = #{wipeoutDate},													
+			a.wipeout_detail = #{wipeoutDetail},													
+			a.del_flag=#{delFlag}	
+		WHERE id = #{id}
+	</update>
+
+    <!--删除用户培训经历表信息-->
+ 	<update id="delete">
+		UPDATE hr_train_experience SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+</mapper>

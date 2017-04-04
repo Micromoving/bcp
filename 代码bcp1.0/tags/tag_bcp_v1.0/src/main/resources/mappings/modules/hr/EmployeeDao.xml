@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.EmployeeDao">
+	<sql id="employeeColumns">
+		a.id,
+		b.name as "user.name",
+		b.photo as "user.photo",
+		b.company_id as "user.company.id",
+		b.office_id as "user.office.id",
+		b.email as "user.email",
+		b.user_type as "user.type",
+		a.user_no,
+		a.gender,
+		a.birth_date,
+		a.nation,
+		a.native_place,
+		a.born_place,
+		a.papers_type,
+		a.papers_number,
+		a.place_domicile,
+		a.marital_status,
+		a.politics_status,
+		a.add_time,
+		a.in_work_date,
+		a.in_school_date,
+		a.engaging_date,
+		a.update_date,
+		a.job_type,
+		a.school_job_type,
+		a.self_identity,
+		a.staff_type,
+		a.establishment_situation,
+		a.is_special,
+		a.staffing_agent,		
+		a.mobile,
+		a.phone,
+		a.qq,
+		a.family_address,
+		a.postcode,
+		a.personal_homepage,
+		a.personal_profile,
+		a.learning_edge_rafters,
+		a.incumbency_status,
+		a.difference_value,
+		a.agent_id,
+		a.agent_into_date,
+		a.only_child_end_date,
+		a.is_part_time,
+		a.del_flag,
+		c.name AS
+		"user.company.name",
+		o.grade AS "office.grade" ,		
+		o.id AS "office.id" ,
+		o.parent_id AS "office.parent" ,
+		o.name AS "office.name"
+	</sql>
+
+	<sql id="employeeJoins">
+		LEFT JOIN sys_user b ON b.id = a.id
+		LEFT JOIN sys_office c ON c.id = b.company_id
+		LEFT JOIN sys_office o ON o.id = b.office_id
+	</sql>
+
+	<!-- 根据编号获得用户 -->
+	<select id="get" resultType="Employee">
+		SELECT
+		<include refid="employeeColumns" />
+		FROM hr_user_employee a
+		<include refid="employeeJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询用户信息 -->
+	<select id="findList" resultType="Employee">
+		SELECT
+		<include refid="employeeColumns" />
+		FROM hr_user_employee a
+		<include refid="employeeJoins" />
+
+		WHERE b.del_flag = #{DEL_FLAG_NORMAL}
+
+		<!-- 按姓名查询 -->
+		<if test="name != null and name != ''">
+			AND b.name like
+			<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{name}, '%')</if>
+		</if>
+
+		<!-- 按部门查询 -->
+		<if test="office.id != null and office.id != ''">
+			AND (b.office_id = #{office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+		
+		<!-- 按政治面貌查询-->
+		<if test="politicsStatus!=null and politicsStatus!=''">
+		    AND (a.politics_status = #{politicsStatus} )
+		
+		</if>
+		
+		
+
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.user_no,b.office_id, a.in_school_date
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 查询全部用户 -->
+	<select id="findAllList" resultType="Employee">
+		SELECT
+		<include refid="employeeColumns" />
+		FROM hr_user_employee a
+		<include refid="employeeJoins" />
+		WHERE b.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 按用户类型为1(教师)查询-->
+		<if test="user!=null and user.userType!=null and user.userType!=''">
+		    AND b.user_type=#{user.userType}
+		</if>
+		order by a.user_no asc
+	</select>
+
+	<!-- 插入职员信息 -->
+	<insert id="insert">
+		INSERT INTO hr_user_employee(
+		id,
+		user_no,
+		gender,
+		birth_date,
+		nation,
+		native_place,
+		born_place,
+		papers_type,
+		papers_number,
+		place_domicile,
+		marital_status,
+		politics_status,
+		add_time,
+		in_work_date,
+		in_school_date,
+		engaging_date,
+		update_date,
+		job_type,
+		school_job_type,
+		self_identity,
+		staff_type,
+		establishment_situation,
+		is_special,
+		staffing_agent,
+		mobile,
+		phone,
+		qq,
+		family_address,
+		postcode,
+		personal_homepage,
+		personal_profile,
+		learning_edge_rafters,
+		incumbency_status,
+		difference_value,
+		agent_id,
+		agent_into_date,
+		only_child_end_date,
+		is_part_time,
+		del_flag
+		)VALUES(
+		#{id},
+		#{userNo},
+		#{gender},
+		#{birthDate},
+		#{nation},
+		#{nativePlace},
+		#{bornPlace},
+		#{papersType},
+		#{papersNumber},
+		#{placeDomicile},
+		#{maritalStatus},
+		#{politicsStatus},
+		#{addTime},
+		#{inWorkDate},
+		#{inSchoolDate},
+		#{engagingDate},
+		#{updateDate},
+		#{jobType},
+		#{schoolJobType},
+		#{selfIdentity},
+		#{staffType},
+		#{establishmentSituation},
+		#{isSpecial},
+		#{staffingAgent},
+		#{mobile},
+		#{phone},
+		#{qq},
+		#{familyAddress},
+		#{postcode},
+		#{personalHomepage},
+		#{personalProfile},
+		#{learningEdgeRafters},
+		#{incumbencyStatus},
+		#{differenceValue},
+		#{agentId},
+		#{agentIntoDate},
+		#{onlyChildEndDate},
+		#{isPartTime},
+		#{delFlag}		
+		)
+	</insert>
+
+	<!--更新用户职员信息 -->
+	<update id="update">
+		UPDATE hr_user_employee SET
+		id=#{id},
+		user_no=#{userNo},
+		gender=#{gender},
+		birth_date=#{birthDate},
+		nation=#{nation},
+		native_place=#{nativePlace},
+		born_place=#{bornPlace},
+		papers_type=#{papersType},
+		papers_number=#{papersNumber},
+		place_domicile=#{placeDomicile},
+		marital_status=#{maritalStatus},
+		politics_status=#{politicsStatus},
+		add_time=#{addTime},
+		in_work_date=#{inWorkDate},
+		in_school_date=#{inSchoolDate},
+		engaging_date=#{engagingDate},
+		update_date=#{updateDate},
+		job_type=#{jobType},
+		school_job_type=#{schoolJobType}，
+		self_identity=#{selfIdentity},
+		staff_type=#{staffType},
+		establishment_situation=#{establishmentSituation},
+		is_special=#{isSpecial},
+		staffing_agent=#{staffingAgent},
+		mobile=#{mobile},
+		phone=#{phone},
+		qq=#{qq},
+		family_address=#{familyAddress},
+		postcode=#{postcode},
+		personal_homepage=#{personalHomepage},
+		personal_profile=#{personalProfile},
+		learning_edge_rafters=#{learningEdgeRafters},
+		incumbency_status=#{incumbencyStatus},
+		difference_value = #{differenceValue},
+		agent_id=#{agentId},
+		agent_into_date=#{agentIntoDate},
+		only_child_end_date = #{onlyChildEndDate},
+		is_part_time = #{isPartTime},
+		del_flag = #{delFlag}		
+		WHERE
+		id = #{id}
+	</update>
+
+	<!--删除用户职员信息 -->
+	<delete id="delete">
+		DELETE FROM hr_user_employee WHERE id = #{id}
+	</delete>
+
+</mapper>

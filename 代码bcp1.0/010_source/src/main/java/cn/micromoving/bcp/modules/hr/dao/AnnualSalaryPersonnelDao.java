@@ -1,0 +1,17 @@
+package cn.micromoving.bcp.modules.hr.dao;
+
+import java.util.List;
+
+import cn.micromoving.bcp.common.persistence.CrudDao;
+import cn.micromoving.bcp.common.persistence.annotation.MyBatisDao;
+import cn.micromoving.bcp.modules.hr.entity.AnnualSalaryPersonnel;
+
+/**
+ * 工作经验表Dao接口
+ * @author Administrator
+ * @version Luyihao
+ */
+ @MyBatisDao
+public interface AnnualSalaryPersonnelDao extends CrudDao<AnnualSalaryPersonnel> {
+	 AnnualSalaryPersonnel judge(AnnualSalaryPersonnel entity);
+ }

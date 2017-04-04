@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SalaryDetailsDao">
+
+
+	<sql id="salaryDetailsColumns">
+		a . id,
+		a .employee_id as "user.id",
+		a .salary_instance_id as
+		"salaryInstance.id",
+		u . name as "user.name",
+		o . name as
+		"user.office.name",
+		u.login_name as "user.loginName",
+		a .year_month,
+		a
+		.professional_level_salary,
+		a
+		.post_salary,
+		a .post_subside,
+		a
+		.new_subsidies,
+		a .school_age_subside,
+		a
+		.position_subsidies,
+		a
+		.health_costs,
+		a .the_only_fee,
+		a
+		.teacher_charge_fee,
+		a .class_fee,
+		a
+		.fill_housing_fund,
+		a
+		.withhold_taxes,
+		a .buckle_room_a,
+		a .buckle_room_b,
+		a
+		.buckle_health_care,
+		a .buckle_unemployment_insurance,
+		a
+		.buckle_endowment_insurance,
+		a .payment_social_security,
+		a .buckle_rent,
+		a .buckle_borrowing,
+		a .buckle_absenteeism,
+		a .buckle_warm,
+		a
+		.buckle_extra_wages,
+		a .year_end_performance,
+		a .duty,
+		a
+		.performance_salary,
+		a .total,
+		a .dummy1,
+		a .dummy2,
+		a .dummy3,
+		a .dummy4,
+		a .dummy5,
+		a .dummy6,
+		a .dummy7,
+		a .dummy8,
+		a .dummy9,
+		a .dummy10,
+		a
+		.del_flag,
+		a .heating_costs,
+		a .spiritual_civilization1,
+		a
+		.spiritual_civilization2,
+		a .spiritual_civilization3,
+		a .dummy11,
+		a
+		.dummy12,
+		a .dummy13,
+		a .dummy14,
+		a .dummy15,
+		a .dummy16,
+		a .dummy17,
+		a
+		.dummy18,
+		a .dummy19,
+		a .dummy20,
+		a.buckle_wages,
+		a.initial_wages,
+		s.data_state as "salaryInstance.dataState",
+		a.birth_insurance,
+		a.buck_occupationalAnnuity
+	</sql>
+
+	<sql id="salaryDetailsJoins">
+		LEFT JOIN sys_user U ON U . ID = A .employee_id
+		LEFT JOIN
+		sys_office o ON o. ID = U .office_id
+		LEFT JOIN hr_salary_instance s ON
+		s. ID = A .salary_instance_id
+	</sql>
+
+	<!--根据用户编号查询值班信息 -->
+	<select id="get" resultType="SalaryDetails">
+		SELECT
+		<include refid="salaryDetailsColumns" />
+		FROM hr_salary_details a
+		<include refid="salaryDetailsJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="id !=null and id != ''">
+			and a.id = #{id}
+
+		</if>
+		<if test="id == null or id ==''">
+			and a.employee_id = #{user.id}
+			and a.salary_instance_id =
+			#{salaryInstance.id}
+		</if>
+
+	</select>
+
+	<!--根据用户编号查询社保信息 -->
+	<select id="getLatestMaxInsure" resultType="java.lang.Double">
+
+		select
+		nvl(sum(BUCKLE_HEALTH_CARE)+sum(BUCKLE_UNEMPLOYMENT_INSURANCE)+sum(BUCKLE_ENDOWMENT_INSURANCE),0)
+		FROM
+		HR_SALARY_DETAILS
+		WHERE
+		EMPLOYEE_ID = #{user.id}
+		AND
+		YEAR_MONTH
+		=#{yearMonth}
+		and
+		del_flag = #{DEL_FLAG_NORMAL}
+
+	</select>
+	<!-- 查询几个月的岗位工资和 -->
+	<select id="getHalfYearPostSalary" resultType="java.lang.Double">
+		SELECT
+		nvl(sum(s.POST_SALARY),0)
+		FROM
+		HR_SALARY_DETAILS s
+		WHERE
+		s.EMPLOYEE_ID = #{user.id}
+		and
+		s.YEAR_MONTH>#{yearMonth}
+		and
+		del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	<!-- 查询几个月的岗位工资和 -->
+	<select id="getHalfYearClassFee" resultType="java.lang.Double">
+		SELECT
+		nvl(sum(s.CLASS_FEE),0)
+		FROM
+		HR_SALARY_DETAILS s
+		WHERE
+		s.EMPLOYEE_ID = #{user.id}
+		and
+		s.YEAR_MONTH>#{yearMonth}
+		and
+		del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="SalaryDetails">
+		SELECT
+		<include refid="salaryDetailsColumns" />
+		FROM hr_salary_details a
+		<include refid="salaryDetailsJoins" />
+		where a.del_flag = #{DEL_FLAG_NORMAL}
+		<if
+			test="salaryInstance !=null and salaryInstance.id!=null and salaryInstance!=''">
+			and a .salary_instance_id=#{salaryInstance.id}
+		</if>
+		<if test="user!=null and user.name!=null and user.name!=''">
+			and u.name like
+			<if test="dbName == 'oracle'">'%'||#{user.name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{user.name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{user.name}, '%')</if>
+		</if>
+		<if
+			test="user!=null and user.office!=null and user.office.id!=null and user.office.id!=''">
+			and (u.office_id = #{user.office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{user.office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{user.office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{user.office.id}, ',%'))</if>
+		</if>
+		<!-- 按上报时间查询 -->
+		<if test="yearMonth != null and yearMonth != ''">
+			AND a.year_month like
+			<if test="dbName == 'oracle'">'%'||replace(replace(#{yearMonth},'年',''),'月','')||'%'
+			</if>
+			<if test="dbName == 'mssql'">'%'+#{yearMonth}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{yearMonth}, '%')</if>
+		</if>
+		<!-- 根据上报的起止时间查询 -->
+		<if test="startDateString != null and startDateString != ''">
+			AND a.year_month &gt;= #{startDateString}
+		</if>
+		<if test="endDateString != null and endDateString != ''">
+			AND a.year_month &lt;= #{endDateString}
+		</if>
+		<!-- 查询走完流程的工资 -->
+		<if
+			test="salaryInstance!=null and salaryInstance.dataState!=null and salaryInstance.dataState!=''">
+			and s.data_state='3'
+		</if>
+
+		<if test="user!=null and user.id!=null and user.id!=''">
+			and a .employee_id=#{user.id}
+		</if>
+		order by u.login_name asc
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="SalaryDetails">
+		SELECT
+		<include refid="salaryDetailsColumns" />
+		FROM hr_salary_details a
+		<include refid="salaryDetailsJoins" />
+
+	</select>
+
+	<!--增加值班信息 -->
+	<insert id="insert">
+		INSERT INTO hr_salary_details(
+		id,
+		employee_id,
+		salary_instance_id,
+		year_month,
+		professional_level_salary,
+		post_salary,
+		post_subside,
+		new_subsidies,
+		school_age_subside,
+		position_subsidies,
+		health_costs,
+		the_only_fee,
+		teacher_charge_fee,
+		class_fee,
+		fill_housing_fund,
+		withhold_taxes,
+		buckle_room_a,
+		buckle_room_b,
+		Buckle_health_care,
+		buckle_unemployment_insurance,
+		buckle_endowment_insurance,
+		Payment_social_security,
+		buckle_rent,
+		buckle_borrowing,
+		buckle_absenteeism,
+		buckle_warm,
+		buckle_extra_wages,
+		year_end_performance,
+		duty,
+		performance_salary,
+		total,
+		dummy1,
+		dummy2,
+		dummy3,
+		dummy4,
+		dummy5,
+		dummy6,
+		dummy7,
+		dummy8,
+		dummy9,
+		dummy10,
+		del_flag,
+		heating_costs,
+		spiritual_civilization1,
+		spiritual_civilization2,
+		spiritual_civilization3,
+		dummy11,
+		dummy12,
+		dummy13,
+		dummy14,
+		dummy15,
+		dummy16,
+		dummy17,
+		dummy18,
+		dummy19,
+		dummy20,
+		birth_insurance,
+		buckle_wages,
+		initial_wages,
+		buck_occupationalAnnuity
+		)VALUES(
+		#{id},
+		#{user.id},
+		#{salaryInstance.id},
+		#{yearMonth},
+		#{professionalLevelSalary},
+		#{postSalary},
+		#{postSubside},
+		#{newSubsidies},
+		#{schoolAgeSubside},
+		#{positionSubsidies},
+		#{healthCosts},
+		#{theOnlyFee},
+		#{teacherChargeFee},
+		#{classFee},
+		#{fillHousingFund},
+		#{withholdTaxes},
+		#{buckleRoomA},
+		#{buckleRoomB},
+		#{buckleHealthCare},
+		#{buckleUnemploymentInsurance},
+		#{buckleEndowmentInsurance},
+		#{paymentSocialSecurity},
+		#{buckleRent},
+		#{buckleBorrowing},
+		#{buckleAbsenteeism},
+		#{buckleWarm},
+		#{buckleExtraWages},
+		#{yearEndPerformance},
+		#{duty},
+		#{performanceSalary},
+		#{professionalLevelSalary}+#{postSalary}+#{postSubside}+#{newSubsidies}+#{schoolAgeSubside}+#{positionSubsidies}+#{healthCosts}+#{theOnlyFee}
+		+#{teacherChargeFee}+#{classFee}+#{fillHousingFund}-#{withholdTaxes}-#{buckleRoomA}-#{buckleRoomB}-#{buckleHealthCare}-#{buckleUnemploymentInsurance}
+		-#{buckleExtraWages}-#{buckleEndowmentInsurance}-#{paymentSocialSecurity}-#{buckleRent}-#{buckleBorrowing}-#{buckleAbsenteeism}-#{buckleWarm}-#{buckleWarm}+#{yearEndPerformance}
+		-#{buckOccupationalAnnuity}+#{duty}+#{performanceSalary}+#{heatingCosts}+#{spiritualCivilization1}+#{spiritualCivilization2}+#{spiritualCivilization3}-#{birthInsurance}+#{dummy1}+#{dummy2}+#{dummy3}+#{dummy4}+#{dummy5}+#{dummy6}+#{dummy7}+#{dummy8}+#{dummy9}+#{dummy10}+#{dummy11}+#{dummy12}+#{dummy13}+#{dummy14}+#{dummy15}+#{dummy16}+#{dummy17}+#{dummy18}+#{dummy19}+#{dummy20},
+		#{dummy1},
+		#{dummy2},
+		#{dummy3},
+		#{dummy4},
+		#{dummy5},
+		#{dummy6},
+		#{dummy7},
+		#{dummy8},
+		#{dummy9},
+		#{dummy10},
+		#{delFlag},
+		#{heatingCosts},
+		#{spiritualCivilization1},
+		#{spiritualCivilization2},
+		#{spiritualCivilization3},
+		#{dummy11},
+		#{dummy12},
+		#{dummy13},
+		#{dummy14},
+		#{dummy15},
+		#{dummy16},
+		#{dummy17},
+		#{dummy18},
+		#{dummy19},
+		#{dummy20},
+		#{birthInsurance},
+		#{buckleWages},
+		#{initialWages},
+		#{buckOccupationalAnnuity}
+		)
+	</insert>
+
+	<!-- 更新值班信息 -->
+	<update id="update">
+		UPDATE hr_salary_details SET
+		id=#{id},
+		employee_id=#{user.id},
+		salary_instance_id = #{salaryInstance.id},
+		year_month = #{yearMonth},
+		professional_level_salary=#{professionalLevelSalary},
+		post_salary=#{postSalary},
+		post_subside=#{postSubside},
+		new_subsidies=#{newSubsidies},
+		school_age_subside=#{schoolAgeSubside},
+		position_subsidies=#{positionSubsidies},
+		health_costs=#{healthCosts},
+		the_only_fee=#{theOnlyFee},
+		teacher_charge_fee=#{teacherChargeFee},
+		class_fee=#{classFee},
+		fill_housing_fund=#{fillHousingFund},
+		withhold_taxes=#{withholdTaxes},
+		buckle_room_a=#{buckleRoomA},
+		buckle_room_b=#{buckleRoomB},
+		Buckle_health_care=#{buckleHealthCare},
+		buckle_unemployment_insurance=#{buckleUnemploymentInsurance},
+		buckle_endowment_insurance=#{buckleEndowmentInsurance},
+		payment_social_security=#{paymentSocialSecurity},
+		buckle_rent=#{buckleRent},
+		buckle_borrowing=#{buckleBorrowing},
+		buckle_absenteeism=#{buckleAbsenteeism},
+		buckle_warm=#{buckleWarm},
+		buckle_extra_wages=#{buckleExtraWages},
+		year_end_performance=#{yearEndPerformance},
+		duty=#{duty},
+		performance_salary=#{performanceSalary},
+		total=#{professionalLevelSalary}+#{postSalary}+#{postSubside}+#{newSubsidies}+#{schoolAgeSubside}+#{positionSubsidies}+#{healthCosts}+#{theOnlyFee}
+		+#{dummy1}+#{dummy2}+#{dummy3}+#{dummy4}+#{dummy5}+#{dummy6}+#{dummy7}+#{dummy8}+#{dummy9}+#{dummy10}+#{dummy11}+#{dummy12}+#{dummy13}+#{dummy14}+#{dummy15}+#{dummy16}+#{dummy17}+#{dummy18}+#{dummy19}+#{dummy20}+#{teacherChargeFee}+#{classFee}+#{fillHousingFund}-#{withholdTaxes}-#{buckleRoomA}-#{buckleRoomB}-#{buckleHealthCare}-#{buckleUnemploymentInsurance}
+		-#{buckleExtraWages}-#{buckleEndowmentInsurance}-#{paymentSocialSecurity}-#{buckleRent}-#{buckleBorrowing}-#{buckleAbsenteeism}-#{buckleWarm}-#{buckleWarm}+#{yearEndPerformance}
+		-#{buckOccupationalAnnuity}+#{duty}+#{performanceSalary}+#{heatingCosts}+#{spiritualCivilization1}+#{spiritualCivilization2}+#{spiritualCivilization3}-#{birthInsurance},
+		dummy1=#{dummy1},
+		dummy2=#{dummy2},
+		dummy3=#{dummy3},
+		dummy4=#{dummy4},
+		dummy5=#{dummy5},
+		dummy6=#{dummy6},
+		dummy7=#{dummy7},
+		dummy8=#{dummy8},
+		dummy9=#{dummy9},
+		dummy10=#{dummy10},
+		del_flag=#{delFlag},
+		heating_costs=#{heatingCosts},
+		spiritual_civilization1=#{spiritualCivilization1},
+		spiritual_civilization2=#{spiritualCivilization2},
+		spiritual_civilization3=#{spiritualCivilization3},
+		dummy11=#{dummy11},
+		dummy12=#{dummy12},
+		dummy13=#{dummy13},
+		dummy14=#{dummy14},
+		dummy15=#{dummy15},
+		dummy16=#{dummy16},
+		dummy17=#{dummy17},
+		dummy18=#{dummy18},
+		dummy19=#{dummy19},
+		dummy20=#{dummy20},
+		birth_insurance=#{birthInsurance},
+		buckle_wages=#{buckleWages},
+		initial_wages=#{initialWages},
+		buck_occupationalAnnuity=#{buckOccupationalAnnuity}
+		WHERE id =
+		#{id}
+	</update>
+
+
+
+	<!-- 逻辑删除值班信息 -->
+	<update id="delete">
+		UPDATE hr_salary_details SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

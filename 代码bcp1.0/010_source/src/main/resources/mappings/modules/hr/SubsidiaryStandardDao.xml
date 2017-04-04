@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SubsidiaryStandardDao">
+
+
+	<sql id="subsidiaryStandardColumns">
+		a .id,
+		a .plan_id as "salaryPlan.id",
+		a .allowance_type,
+		a
+		.allowance_main_body,
+		a .charge_standard,
+		a .allowance_unit,
+		a .comments,
+		a .del_flag
+	</sql>
+
+	<sql id="subsidiaryStandardJoins">
+		LEFT JOIN hr_salary_plan p ON p.id=a.plan_id
+	</sql>
+
+	<!--根据用户编号查询津贴标准 -->
+	<select id="get" resultType="SubsidiaryStandard">
+		SELECT
+		<include refid="subsidiaryStandardColumns" />
+		FROM hr_subsidiary_standard a
+		<include refid="subsidiaryStandardJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--根据用户详情查询津贴标准 -->
+	<select id="getSubsidiary" resultType="SubsidiaryStandard">
+		SELECT
+		<include refid="subsidiaryStandardColumns" />
+		FROM hr_subsidiary_standard a
+		<include refid="subsidiaryStandardJoins" />
+		WHERE p.plan_status='1'
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 津贴类型 allowanceType -->
+		<if test="allowanceType !=null and allowanceType!=''">
+			and a.allowance_type=#{allowanceType}
+		</if>
+		<!-- 津贴主体 allowanceMainBody -->
+		<if test="allowanceMainBody !=null and allowanceMainBody!=''">
+			and a.allowance_main_body=#{allowanceMainBody}
+		</if>
+
+
+	</select>
+
+	<!--分页查询 -->
+	<select id="findList" resultType="SubsidiaryStandard">
+		SELECT
+		<include refid="subsidiaryStandardColumns" />
+		FROM hr_subsidiary_standard a
+		<include refid="subsidiaryStandardJoins" />
+		WHERE p.plan_status='1'
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+			<!-- 津贴类型 allowanceType -->
+		<if test="allowanceType !=null and allowanceType!=''">
+			and a.allowance_type=#{allowanceType}
+		</if>
+		<!-- 津贴主体 allowanceMainBody -->
+		<if test="allowanceMainBody !=null and allowanceMainBody!=''">
+			and a.allowance_main_body=#{allowanceMainBody}
+		</if>
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="SubsidiaryStandard">
+		SELECT
+		<include refid="subsidiaryStandardColumns" />
+		FROM hr_subsidiary_standard a
+		<include refid="subsidiaryStandardJoins" />
+		WHERE p.plan_status='1'
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加津贴标准 -->
+	<insert id="insert">
+		INSERT INTO hr_subsidiary_standard(
+		id,
+		plan_id,
+		allowance_type,
+		allowance_main_body,
+		charge_standard,
+		allowance_unit,
+		comments,
+		del_flag
+		)VALUES(
+		#{id},
+		#{salaryPlan.id},
+		#{allowanceType},
+		#{allowanceMainBody},
+		#{chargeStandard},
+		#{allowanceUnit},
+		#{comments},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新津贴标准 -->
+	<update id="update">
+		UPDATE hr_subsidiary_standard SET
+		id=#{id},
+		plan_id=#{salaryPlan.id},
+		allowance_type=#{allowanceType},
+		allowance_main_body=#{allowanceMainBody},
+		charge_standard=#{chargeStandard},
+		allowance_unit=#{allowanceUnit},
+		comments=#{comments},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除津贴标准 -->
+	<update id="delete">
+		UPDATE hr_subsidiary_standard SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 逻辑删除信息(按工资方案删除) -->
+	<update id="deleteByPlanId">
+		UPDATE hr_subsidiary_standard SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE plan_id = #{id}
+	</update>
+
+</mapper>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.AwardDao">
+
+
+    <sql id="awardColumns">
+	    a.id,
+		a.user_id,
+		a.gain_date,
+		a.awards_name,
+		a.level_one,
+		a.level_two
+    </sql>
+    
+      <sql id="awardJoins">
+    </sql>
+  
+    <!--根据用户编号查询用户奖项表信息-->
+    <select id="get" resultType="Award">
+        SELECT
+	        <include refid="awardColumns"/>
+	    FROM sys_award a
+	    WHERE a.id = #{id}
+    </select>
+    
+	<!-- 全部查询 -->
+     <select id="findAllList" resultType="Award">
+		SELECT
+			<include refid="awardColumns"/>
+		FROM sys_award a
+		<include refid="awardJoins"/>
+		WHERE a.user_id = #{user.id}
+		ORDER BY a.gain_date
+	</select>
+  
+    <!-- 分页查询 -->
+    <select id="findList" resultType="Award">
+		SELECT
+			<include refid="awardColumns"/>
+		FROM sys_award a
+		<include refid="awardJoins"/>
+		WHERE a.user_id = #{user.id}
+		<!-- 数据范围过滤 -->
+    ${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.gain_date
+			</otherwise>
+		</choose>
+	</select>
+
+    <!--增加用户奖项表信息-->
+    <insert id="insert">
+        INSERT INTO sys_award(
+            id,
+		    user_id,
+		    gain_date,
+			awards_name,
+			level_one,
+			level_two
+        )VALUES(
+	        #{id},
+		    #{user.id},
+		    #{gainDate},
+			#{awardsName},
+			#{levelOne},
+			#{levelTwo}
+	    )
+    </insert>
+    
+    <!-- 更新用户奖项表信息 -->
+    <update id="update">
+		UPDATE sys_award SET 
+			id = #{id},
+            user_id = #{user.id},
+		    gain_date = #{gainDate},
+			awards_name = #{awardsName},
+			level_one = #{levelOne},
+			level_two = #{levelTwo}
+		WHERE id = #{id}
+	</update>
+
+    <!--删除用户奖项表信息-->
+    <delete id="delete">
+	    DELETE FROM sys_award WHERE id = #{id}
+	</delete>
+		
+</mapper>	

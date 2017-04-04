@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.ReportPerformanceDao">
+
+
+	<sql id="reportPerformanceColumns">
+		a . id,
+		u.name as "user.name",
+		u.office_id as
+		"user.office.id",
+		u.login_name as "user.loginName",
+		o.name as
+		"user.office.name",
+		a .report_record_id as
+		"reportRecord.id",
+		a
+		.performance_salary,
+		r.year_month as
+		"reportRecord.yearMonth",
+		r.update_date as "reportRecord.updateDate",
+		a
+		.employee_id as "user.id",
+		a .del_flag
+	</sql>
+
+	<sql id="reportPerformanceJoins">
+		LEFT JOIN hr_report_record r ON r.id = a.report_record_id
+		LEFT JOIN sys_user u ON u.ID = A .employee_id
+		LEFT JOIN sys_office o ON
+		o. ID =u.office_id
+	</sql>
+
+	<!--根据用户编号查询上报绩效明细信息 -->
+	<select id="get" resultType="ReportPerformance">
+		SELECT
+		<include refid="reportPerformanceColumns" />
+		FROM Hr_report_performance a
+		<include refid="reportPerformanceJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 根据流程实例ID，取得工资实体记录。 -->
+	<select id="getByProcInsId" resultType="ReportPerformance">
+		SELECT
+		<include refid="reportPerformanceColumns" />
+		FROM Hr_report_performance a
+		<include refid="reportPerformanceJoins" />
+		WHERE a.process_instance_id = #{act.procInsId}
+	</select>
+
+	<!--分页查询用户信息 -->
+	<select id="findList" resultType="ReportPerformance">
+		SELECT
+		<include refid="reportPerformanceColumns" />
+		FROM Hr_report_performance a
+		<include refid="reportPerformanceJoins" />
+		WHERE
+		a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		<if test="user!=null and user.name!=null and user.name!=''">
+			and u.name like
+			<if test="dbName == 'oracle'">'%'||#{user.name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{user.name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{user.name}, '%')</if>
+		</if>
+		<if
+			test="user!=null and user.office!=null and user.office.id!=null and user.office.id!=''">
+			and (u.office_id = #{user.office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{user.office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{user.office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{user.office.id}, ',%'))</if>
+		</if>
+		<if
+			test="reportRecord!=null and reportRecord.id!=null and reportRecord.id!=''">
+			and A .report_record_id = #{reportRecord.id}
+		</if>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		order by u.login_name asc
+	</select>
+
+
+	<select id="findteach" resultType="ReportPerformance">
+		SELECT DISTINCT
+		<include refid="reportPerformanceColumns" />
+		FROM Hr_report_performance a
+		<include refid="reportPerformanceJoins" />
+		WHERE
+		a.del_flag = #{DEL_FLAG_NORMAL}
+		and re.EMPLOYEE_ID = b.EMPLOYEE_ID
+		and b.post_type in
+		(SELECT
+		VALUE
+		FROM
+		SYS_DICT
+		WHERE
+		DESCRIPTION = '岗位类型'
+		and
+		label = '专职辅导员')
+	</select>
+	<!--查询全部用户信息 -->
+	<select id="findAllList" resultType="ReportPerformance">
+		SELECT
+		<include refid="reportPerformanceColumns" />
+		FROM Hr_report_performance a
+		<include refid="reportPerformanceJoins" />
+		WHERE
+		a.del_flag = #{DEL_FLAG_NORMAL}
+		and r.data_classification=1
+		and
+		b.post_type=#{recruitment.postType}
+	</select>
+
+	<!--增加上报绩效明细信息 -->
+	<insert id="insert">
+		INSERT INTO Hr_report_performance(
+		id,
+		report_record_id,
+		employee_id,
+		performance_salary,
+		del_flag
+		)VALUES(
+		#{id},
+		#{reportRecord.id},
+		#{user.id},
+		#{performanceSalary},
+		#{delFlag}
+		)
+	</insert>
+
+	<!--更新上报绩效明细信息 -->
+	<update id="update">
+		UPDATE Hr_report_performance SET
+		id=#{id},
+		report_record_id=#{reportRecord.id},
+		employee_id=#{user.id},
+		performance_salary=#{performanceSalary},
+		del_flag=#{delFlag}
+		WHERE id =
+		#{id}
+	</update>
+
+
+	<!-- 逻辑删除上报绩效明细信息 -->
+	<update id="delete">
+		UPDATE Hr_report_performance SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<update id="deleteByReportId">
+		delete from Hr_report_performance
+		where
+		report_record_id=#{reportRecord.id}
+	</update>
+
+	<!--根据用户编号与年份 -->
+	<select id="count" resultType="int">
+		SELECT
+		COUNT (*)
+		FROM
+		Hr_report_performance a
+		<include refid="reportPerformanceJoins" />
+		WHERE r.year_month = #{reportRecord.yearMonth}
+	</select>
+</mapper>	

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SalEmpViewDao">
+
+
+	<sql id="salempViewColumns">
+		a.id,
+		a.name,
+		a.login_name,
+		a.name as "user.name",
+		a.login_name as "user.loginName",
+		a.gender,
+		a.staff_type,
+		a.only_child_end_date,
+		a.incumbency_status,
+		a.PAPERS_NUMBER,
+		a.in_school_date,
+		a.difference_value,
+		a.performance_level,
+		a.duties,
+		a.post_type,
+		a.post_level,
+		a.professional_level,
+		a.duties_level,
+		a.try_out_date,
+		a.engage_situation,
+		a.end_date,
+		a.max_tech_position_type,
+		a.max_tech_position_level,
+		a.max_edu_background,
+		a.max_degree,
+		a.office_id as "office.id",
+		a.office_name as "office.name",
+		a.office_id as "user.office.id",
+		a.office_name as "user.office.name",
+		a.establishment_situation,
+		a.is_special,
+		a.yearly_salary,
+		a.class_number,
+  		a.not_series_salary_items,
+  		a.mobile,
+  		a.politics_status,
+  		a.degree_start_date,
+  		a.degree_end_date,
+  		a.training_mode,
+  		a.training_cycle,
+  		a.train_start_date,
+  		a.train_end_date
+
+	</sql>
+
+	<sql id="salempViewJoins">
+		sys_office o where o. ID = a.office_id
+	</sql>
+
+	<!--根据用户编号查询用户信息 -->
+	<select id="get" resultType="SalEmpView">
+		SELECT
+		<include refid="salempViewColumns" />
+		FROM sal_emp_view a,
+		<include refid="salempViewJoins" />
+		and a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="SalEmpView">
+		SELECT
+		<include refid="salempViewColumns" />
+		FROM sal_emp_view a,
+		<include refid="salempViewJoins" />
+
+		<if test="postType!=null and postType!=''">
+			and a.post_type in ${postType}
+		</if>
+
+		<if test="group!=null and group!= ''">
+			and a.post_type not in (1,4,6)
+		</if>
+		<if test="staffType!=null and staffType!= ''">
+			and a.staff_type =#{staffType}
+		</if>
+		<!-- 按姓名查询 -->
+		<if test="name != null and name != ''">
+			AND a.name like
+			<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{name}, '%')</if>
+		</if>
+		<if test="loginName!=null and loginName!= ''">
+			and a.login_name =#{loginName}
+		</if>
+		<if test="papersNumber!=null and papersNumber!= ''">
+			and a.papers_number =#{papersNumber}
+		</if>
+		<!-- 按部门查询 -->
+		<if test="office!=null and office.id != null and office.id != ''">
+			AND (a.office_id = #{office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+		<!-- 按政治面貌查询 -->
+		<if test="politicsStatus!=null and politicsStatus!=''">
+			AND a.politics_status = #{politicsStatus}
+		</if>
+		<!-- 按性别查询 -->
+		<if test="gender != null and gender != ''">
+			AND a.gender = #{gender}
+		</if>
+		<!-- 按职称级别查询 -->
+		<if test="maxTechPositionLevel!=null and maxTechPositionLevel!=''">
+		 	AND a.max_tech_position_level = #{maxTechPositionLevel}
+		</if>
+		<!-- 按编制类型查询 -->
+		<if test="establishmentSituation!=null and establishmentSituation!=''">
+			AND a.establishment_situation=#{establishmentSituation}
+		</if>
+		<!-- 人员类型查询 -->
+		<if test="staffType!=null and staffType!=''">
+			AND staff_type=#{staffType}
+		</if>
+		<!-- 按最高学位查询 -->
+		<if test="maxDegree!=null and maxDegree!=''">
+			AND a.max_degree=#{maxDegree}
+		</if>
+		<!-- 按最高学历查询 -->
+		<if test="maxEduBackground!=null and maxEduBackground!=''">
+			AND a.max_edu_background = #{maxEduBackground}
+		</if>
+		<!-- 按 -->
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		order by a.office_id desc, a.professional_level asc
+
+	</select>
+
+</mapper>	

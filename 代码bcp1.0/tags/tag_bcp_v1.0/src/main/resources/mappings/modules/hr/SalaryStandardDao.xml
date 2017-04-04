@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SalaryStandardDao">
+
+
+	<sql id="salarystandardColumns">
+		a.id,
+		a.plan_id as "salaryPlan.id",
+		a.post_type,
+		a.post_level,
+		a.professional_level,
+		a.professional_level_salary,
+		a.post_salary,
+		a.post_subside,
+		a.edu_background,		
+		a.del_flag
+
+	</sql>
+
+	<sql id="salarystandardJoins">
+		LEFT join hr_salary_plan p on p.id =a.plan_id
+	</sql>
+
+	<!--根据用户编号查询系统工资标准信息 -->
+	<select id="get" resultType="SalaryStandard">
+		SELECT
+		<include refid="salarystandardColumns" />
+		FROM hr_salary_standard a
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="SalaryStandard">
+		SELECT
+		<include refid="salarystandardColumns" />
+		FROM hr_salary_standard a
+		<include refid="salarystandardJoins" />
+		WHERE
+		  a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="salaryPlan != null and salaryPlan.id!=null and salaryPlan.id  !=''">
+			AND a.plan_id = #{salaryPlan.id}
+		</if>
+		<if test="salaryPlan!=null and salaryPlan.planStatus != null and planSalaryPlan.status !=''">
+			AND a.plan_status = #{salaryPlan.planStatus}
+		</if>
+		<if test="postType != null and postType !=''">
+			AND a.post_type = #{postType}
+			AND <![CDATA[ a.post_level <'10']]>    
+		</if>
+		<if test="postLevel !=null and postLevel !=''">
+			AND a.post_level =#{postLevel}
+		</if>
+		order by a.post_type asc, a.post_level desc,a.professional_level_salary desc
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="SalaryStandard">
+		SELECT
+		<include refid="salarystandardColumns" />
+		FROM hr_salary_standard a
+		<include refid="salarystandardJoins" />
+		WHERE p.plan_status='1'
+		and a.plan_id=#{salaryPlan.id}
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加系统工资标准信息 -->
+	<insert id="insert">
+		INSERT INTO hr_salary_standard(
+		id,
+		plan_id,
+		post_type,
+		post_level,
+		professional_level,
+		professional_level_salary,
+		post_salary,
+		post_subside,
+		edu_background,
+		del_flag
+		)VALUES(
+		#{id},
+		#{salaryPlan.id},
+		#{postType},
+		#{postLevel},
+		#{professionalLevel},
+		#{professionalLevelSalary},
+		#{postSalary},
+		#{postSubside},
+		#{eduBackground},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新系统工资标准信息 -->
+	<update id="update">
+		UPDATE hr_salary_standard SET
+		id=#{id},
+		plan_id=#{salaryPlan.id},
+		post_type=#{postType},
+		post_level=#{postLevel},
+		professional_level=#{professionalLevel},
+		professional_level_salary=#{professionalLevelSalary},
+		post_salary=#{postSalary},
+		post_subside=#{postSubside},
+		edu_background=#{eduBackground},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除系统工资标准信息 -->
+	<update id="delete">
+		UPDATE hr_salary_standard SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+
+	<!-- 逻辑删除信息(按工资方案删除) -->
+	<update id="deleteByPlanId">
+		UPDATE hr_salary_standard SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE plan_id = #{id}
+	</update>
+</mapper>

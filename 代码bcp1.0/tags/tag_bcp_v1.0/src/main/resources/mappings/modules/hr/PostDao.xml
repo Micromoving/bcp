@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.PostDao">
+
+   
+    <sql id="postColumns">
+	    a.id,		
+		a.office_id as "office.id",	
+		o.name as "office.name",	
+		a.post_level,		
+		a.post_name,		
+		a.comments,		
+		a.del_flag,
+		a.position_setting,		
+		a.post_number_setting,												
+		a.recruit_num																				
+    </sql>
+    
+    <sql id="postJoins">  	
+		LEFT JOIN sys_office o ON o.id = a.office_id
+    </sql>
+  
+    <!--根据用户编号查询岗位信息-->
+    <select id="get" resultType="Post">
+        SELECT
+	        <include refid="postColumns"/>
+	    FROM hr_post a
+	    <include refid="postJoins"/>
+	    WHERE a.id = #{id}
+    </select>
+    <!-- 根据部门ID查询对应的岗位类型 --> 
+	<select id="findPostNameList" resultType="Post">
+		select 
+		distinct
+		 a.post_name 
+		from HR_POST a 
+		<include refid="postJoins"/>
+		where a.OFFICE_ID=#{office.id}
+			  and a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+    <!--分页查询-->
+    <select id="findList" resultType="Post">
+		SELECT
+			<include refid="postColumns"/>
+		FROM hr_post a
+		<include refid="postJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}				
+		
+		<!-- 按部门查询 -->
+		<if test="office != null and office.id != null and office.id != ''">
+			AND (a.office_id = #{office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+		<!-- 按岗位名称查询 -->
+		<if test="postName != null and postName != ''">
+			AND a.post_name like
+			<if test="dbName == 'oracle'">'%'||#{postName}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{postName}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{postName}, '%')</if>
+		</if>
+		<!-- 按岗位级别查询 -->
+		<if test="postLevel != null and postLevel != ''">
+			AND a.post_level like
+			<if test="dbName == 'oracle'">'%'||#{postLevel}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{postLevel}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{postLevel}, '%')</if>
+		</if>
+		
+	</select>    
+	<!--全部查询-->
+	<select id="findAllList" resultType="Post">
+		SELECT
+			<include refid="postColumns"/>
+		FROM hr_post a
+		<include refid="postJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+    <!--增加用岗位职数信息-->
+    <insert id="insert">        
+        INSERT INTO hr_post(
+         	id,													
+			office_id,													
+			post_level,													
+			post_name,																										
+			comments,												
+			del_flag,
+			position_setting,		
+			post_number_setting,												
+			recruit_num												
+					
+        )VALUES(
+	        #{id},
+            #{office.id},
+		    #{postLevel},
+		    #{postName},
+		    #{comments},
+		    #{delFlag},
+		    #{positionSetting},
+		    #{postNumberSetting},
+		    #{recruitNum}	    
+	    )
+    </insert>    
+    <!-- 更新岗位职数信息 -->
+    <update id="update">
+		UPDATE hr_post SET 
+			id= #{id},													
+			office_id=  #{office.id},													
+			post_level=#{postLevel},													
+			post_name= #{postName},													
+			comments= #{comments},
+			del_flag=#{delFlag}	,
+			position_setting=#{positionSetting},		
+			post_number_setting=#{postNumberSetting},												
+			recruit_num=#{recruitNum}		
+		WHERE id = #{id}
+	</update>
+
+    
+	
+	<!-- 逻辑删除岗位职数信息 -->
+	<update id="delete">
+		UPDATE hr_post SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+</mapper>	

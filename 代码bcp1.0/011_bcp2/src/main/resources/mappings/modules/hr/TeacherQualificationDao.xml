@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.TeacherQualificationDao">
+	<sql id="teacherQualificationColumns">
+		a.id,
+		a.employee_id as "employee.id",
+		a.certificate_types,
+		a.certification_number,
+		a.teaching_subjects,
+		a.certificate_issue_date,
+		a.issuing_agency,
+		a.application_unit,
+		a.audit_date,
+		a.remark,
+		a.del_flag,
+		o.id as "office.id",
+		o.name as "office.name",
+		u.name as "user.name",
+		e.political_landscape as "employee.politicalLandscape",
+		u.login_name as "user.loginName"
+	</sql>
+
+	<sql id="teacherQualificationJoins">
+		LEFT JOIN hr_employee e on e.id=a.employee_id
+		LEFT JOIN sys_user u on u.id=a.employee_id
+		LEFT JOIN sys_office o on o.id=u.office_id
+	</sql>
+
+	<!-- 根据编号获得用户教师资格 -->
+	<select id="get" resultType="TeacherQualification">
+		SELECT
+		<include refid="teacherQualificationColumns" />
+		FROM hr_teacher_qualification a
+		<include refid="teacherQualificationJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询 -->
+	<select id="findList" resultType="TeacherQualification">
+		SELECT
+		<include refid="teacherQualificationColumns" />
+		FROM hr_teacher_qualification a
+		<include refid="teacherQualificationJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="user!=null and user.name!=null and user.name!=''">
+			and u.name like
+			<if test="dbName == 'oracle'">'%'||#{user.name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{user.name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{user.name}, '%')</if>
+		</if>
+		<!-- 按部门查询 -->
+		<if test="office!=null and office.id != null and office.id != ''">
+			AND (u.office_id = #{office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+		
+		<!-- 按教师资格证种类查询-->
+		<if test="certificateTypes!=null and certificateTypes!=''">
+		    AND (a.certificate_types = #{certificateTypes} )
+		</if>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY u.login_name,u.office_id, e.in_school_date
+			</otherwise>
+		</choose>
+	</select>
+		
+
+	<!-- 查询全部 -->
+	<select id="findAllList" resultType="LanguageAbility">
+		SELECT
+		<include refid="teacherQualificationColumns" />
+		FROM hr_Language_ability a
+		<include refid="teacherQualificationJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!-- 插入用户教师资格 -->
+	<insert id="insert">
+		INSERT INTO hr_teacher_qualification(
+		id,
+		employee_id,
+		certificate_types,
+		certification_number,
+		teaching_subjects,
+		certificate_issue_date,
+		issuing_agency,
+		application_unit,
+		audit_date,
+		remark,
+		del_flag
+		)VALUES(
+		#{id},
+		#{employee.id},
+		#{certificateTypes},
+		#{certificationNumber},
+		#{teachingSubjects},
+		#{certificateIssueDate},
+		#{issuingAgency},
+		#{applicationUnit},
+		#{auditDate},
+		#{remark},
+		#{delFlag}
+		)
+	</insert>
+
+	<!--更新用户教师资格 -->
+	<update id="update">
+		UPDATE hr_teacher_qualification SET
+		id=#{id},
+		employee_id=#{employee.id},
+		certificate_types=#{certificateTypes},
+		certification_number=#{certificationNumber},
+		teaching_subjects=#{teachingSubjects},
+		certificate_issue_datE=#{certificateIssueDate},
+		issuing_agency=#{issuingAgency},
+		application_unit=#{applicationUnit},
+		audit_date=#{auditDate},
+		remark=#{remark},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+	<!--删除用户教师资格 -->
+	<delete id="delete">
+		UPDATE hr_teacher_qualification SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

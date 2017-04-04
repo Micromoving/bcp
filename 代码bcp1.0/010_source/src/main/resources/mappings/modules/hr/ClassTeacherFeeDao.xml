@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.ClassTeacherFeeDao">
+
+
+    <sql id="classTeacherFeeColumns">
+	     A . id,
+	     u.login_name as "user.LoginName",
+	     U.NAME as "user.name",
+	     O.name as "office.name",
+		 A .employee_id as "user.id",
+		 A .class_number,
+		 A .create_by,
+		 A .creat_date,
+		 A .update_by,
+		 A .update_date,
+		 A .del_flag
+    </sql>
+  
+    <sql id="classTeacherFeeJoins">
+		left JOIN sys_user U ON U . ID = a.employee_id
+		LEFT JOIN sys_office o ON o. ID = U .office_id
+	</sql> 
+	
+    <!--根据用户编号查询用户工作经验信息-->
+    <select id="get" resultType="ClassTeacherFee">
+        SELECT
+	        <include refid="classTeacherFeeColumns"/>
+	    FROM hr_class_teacher_fee a
+	    <include refid="classTeacherFeeJoins"/>
+	    WHERE a.id = #{id}
+    </select>   
+    
+    
+    <!-- 分页查询  -->
+    <select id="findList" resultType="ClassTeacherFee">
+		SELECT 
+			<include refid="classTeacherFeeColumns"/>
+		FROM hr_class_teacher_fee a
+		<include refid="classTeacherFeeJoins"/>
+		where a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>	
+		
+
+	
+	<!-- 查询全部用户信息 -->
+	<select id="findAllList" resultType="ClassTeacherFee">
+		SELECT
+			<include refid="classTeacherFeeColumns"/>
+		FROM hr_class_teacher_fee s
+		<include refid="classTeacherFeeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		  
+	</select>	 
+
+    <!--增加用户工作经验信息-->
+    <insert id="insert">
+        INSERT INTO hr_class_teacher_fee(
+             id,
+			 employee_id,
+			 class_number,
+			 create_by,
+			 creat_date,
+			 update_by,
+			 update_date,
+			 del_flag
+        )VALUES(
+	         #{id},
+			 #{user.id},
+			 #{classNumber},
+			 #{createBy},
+			 #{creatDate},
+			 #{updateBy},
+			 #{updateDate},
+			 #{delFlag}
+	    )
+    </insert>
+    
+    <!--更新用户工作经验信息-->
+    <update id="update">
+		UPDATE hr_class_teacher_fee SET 
+			 id=#{id},
+			 employee_id=#{user.id},
+			 class_number={classNumber},
+			 create_by=#{createBy},
+			 creat_date=#{creatDate},
+			 update_by=#{updateBy},
+			 update_date=#{updateDate},
+			 del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+    <!--删除用户工作经验信息-->
+    <delete id="delete">
+	    DELETE FROM hr_class_teacher_fee WHERE id = #{id}
+	</delete>
+	
+
+	
+
+</mapper>

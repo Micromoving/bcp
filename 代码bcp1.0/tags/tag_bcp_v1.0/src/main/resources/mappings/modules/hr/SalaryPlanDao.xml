@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SalaryPlanDao">
+
+
+	<sql id="salaryplanColumns">
+		a.id,
+		a.plan_name,
+		a.plan_status,
+		a.plan_explain,
+		a.create_by
+		as "createBy.id",
+		u.name as "createBy.name",
+		a.create_date,
+		a.update_by
+		as "updateBy.id",
+		a.update_date,
+		a.comments,
+		a.del_flag
+
+	</sql>
+
+	<sql id="salaryplanJoins">
+		left join sys_user u on u.id =a.create_by
+		left join sys_user
+		up on up.id = a.update_by
+	</sql>
+
+	<!--根据用户编号查询用户工资方案信息 -->
+	<select id="get" resultType="SalaryPlan">
+		SELECT
+		<include refid="salaryplanColumns" />
+		FROM hr_salary_plan a
+		<include refid="salaryplanJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="SalaryPlan">
+		SELECT
+		<include refid="salaryplanColumns" />
+		FROM hr_salary_plan a
+		<include refid="salaryplanJoins" />
+		WHERE
+		a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="SalaryPlan">
+		SELECT
+		<include refid="salaryplanColumns" />
+		FROM hr_salary_plan a
+		<include refid="salaryplanJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户工资方案信息 -->
+	<insert id="insert">
+		INSERT INTO hr_salary_plan(
+		id,
+		plan_name,
+		plan_status,
+		plan_explain,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		comments,
+		del_flag
+		)VALUES(
+		#{id},
+		#{planName},
+		#{planStatus},
+		#{planExplain},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{comments},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户工资方案信息 -->
+	<update id="update">
+		UPDATE hr_salary_plan SET
+
+		plan_name =	#{planName},
+		plan_status = #{planStatus},
+		plan_explain=#{planExplain},
+		create_by = #{createBy.id},
+		create_date =#{createDate},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		comments = #{comments},
+		del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+	<!-- 更新用户工资方案信息,当用户选中方案时，启动该方案。 -->
+	<!--设置当前方案为可用。 -->
+	<update id="enable">
+		UPDATE hr_salary_plan SET
+		plan_status = '1'
+		WHERE id
+		=#{id}
+
+	</update>
+	<!-- 更新用户工资方案信息,当用户选中方案时，启动该方案。 -->
+	<!--设置其余方案不可用。 -->
+	<update id="disable">
+
+		UPDATE hr_salary_plan SET
+		plan_status = '0'
+		WHERE
+		plan_status = 1
+	</update>
+
+
+	<!-- 逻辑删除用户工资方案信息 -->
+	<update id="delete">
+		UPDATE hr_salary_plan SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+
+</mapper>

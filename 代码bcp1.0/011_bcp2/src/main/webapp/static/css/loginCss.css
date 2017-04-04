@@ -1,0 +1,321 @@
+
+/*body*/
+body {
+    background-color: #f6f6f6;
+    font: 12px/1.5 arial;
+}
+body, input {
+    font: 12px/1.5 Arial;
+    color: #333;
+}
+/*body 完*/
+
+body, h1, h2, h3, h4, h5, h6, dl, dt, dd, ul, ol, li, th, td, p, blockquote, pre, form, fieldset, legend, input, button, textarea, hr {
+    margin: 0;
+    padding: 0;
+}
+a {
+    color: #0368a8;
+    text-decoration: none;
+}
+.wrapper {
+    width: 980px;
+    margin: 0 auto;
+}
+
+
+/*header*/
+.header {
+    height: 56px;
+    padding: 30px 0;
+}
+
+.header .logo {
+    float: left;
+    width: 200px;
+    height: 56px;
+    margin: 0 18px 0 0;
+    overflow: hidden;
+    background: url() no-repeat;
+}
+
+.header .logo-tip {
+    float: left;
+    margin: 22px 0 0;
+    font: 20px/34px "Microsoft YaHei", arial;
+    color: #bfbfbf;
+}
+/*head完*/
+
+
+.content {
+    min-height: 350px;
+    padding: 45px 0;
+    zoom: 1;
+    background-color: #fff;
+    border: 1px solid #e6e6e6;
+}
+
+/*clear*/
+.clearfix:after {
+    content: ".";
+    display: block;
+    visibility: hidden;
+    clear: both;
+    height: 0;
+    font-size: 0;
+}
+
+.clearfix {
+    *zoom: 1;
+}
+/*clear完*/
+
+/* 登录注册版块 */
+.login-regist {
+    float: left;
+    width: 300px;
+    padding: 0 94px 0 350px;
+}
+.login-box {
+    width: 300px;
+    background-color: #fff;
+}
+.login-btn .wait-bar {
+    display: none;
+    position: absolute;
+    top: 38px;
+    left: 0;
+    height: 4px;
+    background: url() 100% center no-repeat #5bc92e;
+    font: 0/0 arial;
+}
+.pass-btn {
+    display: block;
+    width: 300px;
+    height: 42px;
+    background-color: #009a61;
+    border: 0 none;
+    line-height: 42px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+    text-align: center;
+    color: #fff;
+    -webkit-transi tion: .3s;
+    trans ition: .3s;
+}
+
+.pass-btn:hover {
+    background-color: #005f3c;
+    color: #fff;
+    text-decoration: none;
+}
+.title {
+    padding: 0 0 24px;
+    zoom: 1;
+    font: 18px/28px "Microsoft YaHei", arial;
+    color: #666;
+}
+.user-name {
+    z-index: 2;
+}
+.login-regist .user-name .right-ico {
+    top: 14px;
+}
+.itembox {
+    position: relative;
+    width: 300px;
+    padding: 10px 0;
+}
+.itembox .right-ico {
+    display: none;
+    position: absolute;
+    top: 21px;
+    right: -29px;
+    width: 18px;
+    height: 18px;
+    background-position: -262px 0;
+}
+.item {
+    position: relative;
+    width: 236px;
+    height: 36px;
+    padding: 0 27px 0 35px;
+    border: 1px solid #e6e6e6;
+}
+.item .ico {
+    position: absolute;
+    left: 9px;
+    top: 7px;
+    width: 26px;
+    height: 22px;
+    border-right: 1px solid #e6e6e6;
+}
+.pass-verifycode .item {
+    width: 88px;
+    padding-left: 0;
+    padding-right: 30px;
+}
+.user-name .ico {
+    background-position: -356px 1px;
+}
+
+.user-pwd .ico {
+    background-position: -357px -55px;
+}
+.item .delete-btn {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 6px;
+    width: 22px;
+    height: 21px;
+    cursor: pointer;
+    background-position: -297px 5px;
+}
+
+.item .delete-btn:hover {
+    background-position: -280px 5px;
+}
+.item .txt-tip {
+    position: absolute;
+    top: 7px;
+    left: 46px;
+    z-index: 0;
+    font-size: 12px;
+    line-height: 20px;
+    color: #ccc;
+}
+.item .txt {
+    position: relative;
+    z-index: 1;
+    width: 215px;
+    height: 18px;
+    padding: 9px 0 9px 10px;
+    *margin: -1px 0 0;
+    background-color: transparent;
+    border: 0 none;
+    outline: none;
+    color: #666;
+    font-size: 16px;
+    line-height: 18px;
+}
+.member-pass {
+    margin: 0 0 5px;
+    color: #666;
+}
+.member-pass .forget-pwd {
+    float: right;
+}
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+}
+
+.tmall-comment {
+    float: right;
+    margin: 0 0 5px 0;
+    display: block;
+    width: 100%;
+}
+
+.login-btn {
+    margin-top: 30px;
+}
+
+.tmall-comment a {
+    color: #dc2626;
+    text-decoration: none;
+}
+
+.tmall-comment a:hover {
+    text-decoration: underline;
+}
+
+.tmall-comment input {
+    margin: 0 4px 0 0;
+}
+.pass-verifycode .verifycode-img {
+    position: absolute;
+    top: 10px;
+    left: 129px;
+    width: 113px;
+    height: 38px;
+}
+.pass-verifycode .verifycode-changelink {
+    position: absolute;
+    top: 10px;
+    left: 253px;
+    height: 38px;
+    line-height: 38px;
+    white-space: nowrap;
+}
+.login-regist .wrong-tips, .login-regist .warning-tips {
+    margin-top: -24px;
+}
+.wrong-tips {
+    width: 288px;
+    height: 22px;
+    margin: 10px 0 0;
+    padding: 0 5px;
+    background-color: #fef2ef;
+    border: 1px solid #fcd5d4;
+    color: #e81212;
+    line-height: 22px;
+}
+
+.alert .close {
+    position: relative;
+    top: -2px;
+    right: -21px;
+    line-height: 20px;
+}
+button.close {
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    -webkit-appearance: none;
+}
+.close {
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #000000;
+    text-shadow: 0 1px 0 #ffffff;
+    opacity: 0.2;
+    filter: alpha(opacity=20);
+}
+
+/* foot */
+.foot {
+    height: 40px;
+    padding: 2px 0;
+}
+.foot .footerw {
+    margin: 20px 0 0;
+    padding-left: 5px;
+    color: #999;
+}
+
+.foot .footerw a, .foot .footerw a.aboutme {
+    color: #BFBFBF;
+}
+
+.foot .footerw a:hover {
+    color: #c00;
+    text-decoration: underline;
+}
+
+.footerw {
+    color: #AB99BC;
+    margin: 0 auto;
+    float: none;
+    text-align: left;
+    font-size: 12px;
+    font-family: arial;
+    line-height: 30px;
+    padding: 5px 0
+}

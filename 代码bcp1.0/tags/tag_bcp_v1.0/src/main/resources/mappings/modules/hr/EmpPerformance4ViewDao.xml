@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.EmpPerformance4ViewDao">
+
+
+	<sql id="empPerformance4ViewColumns">
+		a.id, 
+		a.name, 
+		a.login_name, 
+		a.office_id, 
+		a.office_name, 
+		a.latest_sal, 
+		a.std_sal, 
+		a.performance_level
+	</sql>
+
+	<sql id="empPerformance4ViewJoins">
+		
+	</sql>
+
+	<!--根据用户编号查询用户信息 -->
+	<select id="get" resultType="EmpPerformance4View">
+		SELECT
+		<include refid="empPerformance4ViewColumns" />
+		FROM emp_performance_4_view a
+		<include refid="empPerformance4ViewJoins" />
+		a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="EmpPerformance4View">
+		SELECT
+		<include refid="empPerformance4ViewColumns" />
+		FROM emp_performance_4_view a
+		<include refid="empPerformance4ViewJoins" />
+		order by a.login_name,a.performance_level asc
+	</select>
+
+</mapper>	

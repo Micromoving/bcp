@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SalaryInstanceTaskDao">
+
+
+	<sql id="salaryInstanceTaskColumns">
+		a . id,
+		a .salary_instance_id as "salaryInstance.id",	
+		si.salary_items_name as "salaryItems.salaryItemsName", 		
+		si.salary_type as "salaryItems.salaryType",
+		si.salary_mark as "salaryItems.salaryMark",								
+		a .salary_items_id as "salaryItems.id",		
+		a .coefficient,														
+		a .del_flag
+	</sql>
+
+	<sql id="salaryInstanceTaskJoins">
+		LEFT JOIN hr_salary_instance s ON s.id=a.salary_instance_id
+		LEFT JOIN HR_SALARY_ITEMS si on si.id = a .salary_items_id 
+	</sql>
+
+	<!--根据用户编号查询上报记录信息 -->
+	<select id="get" resultType="SalaryInstanceTask">
+		SELECT
+		<include refid="salaryInstanceTaskColumns" />
+		FROM hr_salary_instance_task  a
+		<include refid="salaryInstanceTaskJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="SalaryInstanceTask">
+		SELECT
+		<include refid="salaryInstanceTaskColumns" />
+		FROM hr_salary_instance_task  a
+		<include refid="salaryInstanceTaskJoins" />
+		WHERE a.salary_instance_id = #{salaryInstance.id}
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+		order by a.salary_items_id  asc
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="SalaryInstanceTask">
+		SELECT
+		<include refid="salaryInstanceTaskColumns" />
+		FROM hr_salary_instance_task  a
+		<include refid="salaryInstanceTaskJoins" />
+		WHERE a.salary_instance_id = #{salaryInstance.id}
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加上报记录信息 -->
+	<insert id="insert">
+		INSERT INTO hr_salary_instance_task (
+			id,
+			salary_instance_id,
+			salary_items_id,
+			coefficient,
+			del_flag
+		)VALUES(
+			#{id},
+			#{salaryInstance.id},
+			#{salaryItems.id},
+			#{coefficient},
+			#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新上报记录信息 -->
+	<update id="update">
+		UPDATE hr_salary_instance_task  SET
+			id=#{id},
+			salary_instance_id=#{salaryInstance.id},
+			salary_items_id=#{salaryItems.id},
+			coefficient=#{coefficient},
+			del_fla=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除上报记录信息 -->
+	<update id="delete">
+		UPDATE hr_salary_instance_task  SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE	id = #{id}
+	</update>
+
+</mapper>

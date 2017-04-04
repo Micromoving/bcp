@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.DutyDetailDao">
+
+
+	<sql id="dutyDetailColumns">
+		a.id,
+		u.name as "user.name",
+		u.id as "user.id",
+		u.login_name as "user.loginName",
+		u.office_id as  "user.office.id",
+		o.name as  "user.office.name",
+		a.report_record_id as "reportRecord.id",
+		r.year_month AS "reportRecord.yearMonth",
+		r.update_date AS  "reportRecord.updateDate",
+		a.employee_id as "user.id",
+		a.duty_type,
+		a.duty_days,
+		a.del_flag,
+		o.id as "office.id",
+		o.name as "office.name"
+	</sql>
+
+	<sql id="dutyDetailJoins">
+		LEFT JOIN hr_report_record r ON r.id = a.report_record_id
+		LEFT JOIN sys_user u ON u.ID = A .employee_id
+		LEFT JOIN sys_office o ON o. ID =u.office_id
+	</sql>
+
+	<!--根据用户编号查询用户上报值班情况信息 -->
+	<select id="get" resultType="DutyDetail">
+		SELECT
+		<include refid="dutyDetailColumns" />
+		FROM hr_duty_detail a
+		<include refid="dutyDetailJoins" />
+		WHERE a.id = #{id}
+	</select>
+	
+	<!--分页查询 -->
+	<select id="findList" resultType="DutyDetail">
+		SELECT
+		<include refid="dutyDetailColumns" />
+		FROM hr_duty_detail a
+		<include refid="dutyDetailJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 按姓名查询 -->
+		<if test="user!=null and user.name!=null and user.name!=''">
+			and u.name like
+			<if test="dbName == 'oracle'">'%'||#{user.name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{user.name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{user.name}, '%')</if>
+		</if>
+
+		<!-- 按office查询 -->
+		<if
+			test="user!=null and user.office != null and user.office.id!=null and user.office.id != ''">
+			and u.office_id =#{user.office.id}
+		</if>
+		<if
+			test="reportRecord!=null and reportRecord.id!=null and reportRecord.id!='' ">
+			and a.report_record_id=#{reportRecord.id}
+		</if>
+		<if test="user!=null and user.id!=null and user.id!=''">
+		and a.employee_id =#{user.id}
+		</if>
+		order by u.login_name asc,a.DUTY_TYPE asc
+		
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="DutyDetail">
+		SELECT
+		<include refid="dutyDetailColumns" />
+		FROM hr_duty_detail a
+		<include refid="dutyDetailJoins" />
+		WHERE r.DATA_CLASSIFICATION =3
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户上报值班情况信息 -->
+	<insert id="insert">
+		INSERT INTO hr_duty_detail(
+		id,
+		report_record_id,
+		employee_id,
+		duty_type,
+		duty_days,
+		del_flag
+		)VALUES(
+		#{id},
+		#{reportRecord.id},
+		#{user.id},
+		#{dutyType},
+		#{dutyDays},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户教育情况信息 -->
+	<update id="update">
+		UPDATE hr_duty_detail SET
+		id=#{id},
+		report_record_id=#{reportRecord.id},
+		employee_id=#{user.id},
+		duty_type=#{dutyType},
+		duty_days=#{dutyDays},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除用户教育情况信息 -->
+	<update id="delete">
+		UPDATE hr_duty_detail SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+	
+	<update id="deleteByReportId">
+		delete from hr_duty_detail
+		where report_record_id=#{reportRecord.id}
+	</update>
+
+</mapper>

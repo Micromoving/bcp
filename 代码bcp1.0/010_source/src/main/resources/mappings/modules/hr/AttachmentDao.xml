@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.AttachmentDao">
+
+   
+    <sql id="attachmentColumns">
+	    a.id,
+		a.achievement_id as "achievement.achievementId",
+		a.attachment_name,
+		a.attachment_source,
+		a.comments,
+		a.attachment_path
+    </sql>
+    
+    <sql id="attachmentJoins">
+    	LEFT JOIN sr_achievement b ON b. achievement_id = A .achievement_id
+    </sql>
+  
+    <!--根据用户编号查询用户附件信息-->
+    <select id="get" resultType="Attachment">
+        SELECT
+	        <include refid="attachmentColumns"/>
+	    FROM sys_attachment a
+	    <include refid="attachmentJoins"/>
+	    WHERE a.achievement_id=#{achievement.achievementId}
+    </select>
+    <!--分页查询-->
+    <select id="findList" resultType="Attachment">
+		SELECT
+			<include refid="attachmentColumns"/>
+		FROM sys_attachment a
+		<include refid="attachmentJoins"/>
+	</select>    
+	<!--全部查询-->
+	<select id="findAllList" resultType="Attachment">
+		SELECT
+			<include refid="attachmentColumns"/>
+		FROM sys_attachment a
+		<include refid="attachmentJoins"/>
+	</select>
+
+    <!--增加用户附件信息-->
+    <insert id="insert">
+        INSERT INTO sys_attachment(
+            id,
+			achievement_id,
+			attachment_name,
+			attachment_source,
+			comments,
+			attachment_path
+        )VALUES(
+	        #{id},
+            #{achievement.achievementId},
+		    #{attachmentName},
+		    #{attachmentSource},
+		    #{comments},
+		    #{attachmentPath}
+	    )
+    </insert>
+    
+    <!-- 更新用户附件信息 -->
+    <update id="update">
+		UPDATE sys_attachment SET 
+			id=#{id},
+			achievement_id=#{achievement.achievementId},
+			attachment_name=#{attachmentName},
+			attachment_source=#{attachmentSource},
+			comments=#{comments},
+			attachment_path=#{attachmentPath}
+		WHERE id = #{id}
+	</update>
+
+    <!--删除用户附件信息-->
+	<delete id="delete">
+		 DELETE FROM sys_attachment WHERE id = #{id}
+	</delete>
+	
+</mapper>	

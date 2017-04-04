@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.PostAppointmentDao">
+	<sql id="postAppointmentColumns">
+		a.id,
+		a.employee_id as"employee.id",
+		a.post_type ,
+		a.post_level,
+		a.serve_other_positions,
+		a.adjunct_post_category,
+		a.adjunct_post_rank,
+		a.the_duty,
+		a.start_date,
+		a.party_and_government_posts,
+		a.party_and_government_level,
+		a.psychological_counseling,
+		a.psychological_certificate,
+		a.whether_counselor,
+		a.office,
+		a.duty,
+		a.professional_level,
+		a.duties_level,
+		a.try_out_date,
+		a.engage_situation,
+		a.end_date,
+		a.is_sign_contract,
+		a.remarks,
+		a.del_flag,
+		o.id as "employee.office.id",
+		o.name as "employee.office.name",
+		e.name as "employee.name"
+	</sql>
+
+	<sql id="postAppointmentJoins">
+		LEFT JOIN hr_employee e on e.id=a.employee_id
+		LEFT JOIN sys_user u on u.id=a.employee_id
+		LEFT JOIN sys_office o on o.id=u.office_id
+	</sql>
+
+	<!-- 根据编号获得岗位聘任信息 -->
+	<select id="get" resultType="PostAppointment">
+		SELECT
+		<include refid="postAppointmentColumns" />
+		FROM hr_post_appointment a
+		<include refid="postAppointmentJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询岗位聘任信息 -->
+	<select id="findList" resultType="PostAppointment">
+		SELECT
+		<include refid="postAppointmentColumns" />
+		FROM hr_post_appointment a
+		<include refid="postAppointmentJoins" />
+
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!-- 查询全部 -->
+	<select id="findAllList" resultType="PostAppointment">
+		SELECT
+		<include refid="postAppointmentColumns" />
+		FROM hr_post_appointment a
+		<include refid="postAppointmentJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!-- 插入岗位聘任信息 -->
+	<insert id="insert">
+		INSERT INTO hr_post_appointment(
+		id,
+		employee_id,
+		post_type,
+		post_level,
+		serve_other_positions,
+		adjunct_post_category,
+		adjunct_post_rank,
+		the_duty,
+		start_date,
+		party_and_government_posts,
+		party_and_government_level,
+		psychological_counseling,
+		psychological_certificate,
+		whether_counselor,
+		office,
+		duty,
+		professional_level,
+		duties_level,
+		try_out_date,
+		engage_situation,
+		end_date,
+		is_sign_contract,
+		remarks,
+		del_flag
+
+
+
+		)VALUES(
+		#{id},
+		#{employee.id},
+		#{postType},
+		#{postLevel},
+		#{serveOtherPositions},
+		#{adjunctPostCategory},
+		#{adjunctPostRank},
+		#{theDuty},
+		#{startDate},
+		#{partyAndGovernmentPosts},
+		#{partyAndGovernmentLevel},
+		#{psychologicalCounseling},
+		#{psychologicalCertificate},
+		#{whetherCounselor},
+		#{office},
+		#{duty},
+		#{professionalLevel},
+		#{dutiesLevel},
+		#{tryOutDate},
+		#{engageSituation},
+		#{endDate},
+		#{isSignContract},
+		#{remarks},
+		#{delFlag}
+
+		)
+	</insert>
+
+	<!--更新岗位聘任信息 -->
+	<update id="update">
+		UPDATE hr_post_appointment SET
+		id=#{id},
+		employee_id=#{employee.id},
+		post_type=#{postType},
+		post_level=#{postLevel},
+		serve_other_positions=#{serveOtherPositions},
+		adjunct_post_category=#{adjunctPostCategory},
+		adjunct_post_rank=#{adjunctPostRank},
+		the_duty=#{theDuty},
+		start_date=#{startDate},
+		party_and_government_posts=#{partyAndGovernmentPosts},
+		party_and_government_level=#{partyAndGovernmentLevel},
+		psychological_counseling=#{psychologicalCounseling},
+		psychological_certificte=#{psychologicalCertificate},
+		whether_counselor=#{whetherCounselor},
+		office=#{office},
+		duty=#{duty},
+		professional_level=#{professionalLevel},
+		duties_level=#{dutiesLevel},
+		try_out_date=#{tryOutDate},
+		engage_situation=#{engageSituation},
+		end_date=#{endDate},
+		is_sign_contract=#{isSignContract},
+		remarks=#{remarks},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+	<!--删除岗位聘任信息 -->
+	<delete id="delete">
+		DELETE FROM hr_post_appointment WHERE id = #{id}
+	</delete>
+
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SalViewDao">
+
+	<sql id="salViewColumns">
+		ID,
+		A.PROFESSIONAL_LEVEL_SALARY,
+		A.POST_SALARY,
+		A.PERFORMANCE_SALARY,
+		A.POST_SUBSIDE
+	</sql>
+
+	<sql id="salViewJoins">
+	</sql>
+
+	<!--根据用户编号查询系统工资标准信息 -->
+	<select id="get" resultType="SalView">
+		SELECT
+		<include refid="salViewColumns" />
+		FROM sal_view a
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="SalView">
+		SELECT
+		<include refid="salViewColumns" />
+		FROM sal_view a
+		<include refid="salViewJoins" />
+	</select>
+	<!--查询:按用户ID查询用户的工资。 -->
+	<select id="findSalByUser" resultType="SalView">
+		SELECT
+		<include refid="salViewColumns" />
+		FROM SAL_STANDARD_VIEW a,
+		sal_emp_view E
+
+		WHERE a.POST_TYPE = E.POST_TYPE
+		and e.id =#{id}
+		<if
+			test="postType!=null and postType!='' and postType==1">
+			and e.PERFORMANCE_LEVEL = a.PERFORMANCE_LEVEL
+		</if>
+		<if test="professionalLevel!=null and professionalLevel!='' ">
+
+			and a.PROFESSIONAL_LEVEL=#{professionalLevel}
+		</if>
+		<if test="postLevel!=null and postLevel!=''">
+			and a.post_level =#{postLevel}
+		</if>
+
+
+	</select>
+</mapper>

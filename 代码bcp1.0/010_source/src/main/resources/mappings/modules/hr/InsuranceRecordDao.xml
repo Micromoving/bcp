@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.InsuranceRecordDao">
+	
+	<sql id="insuranceRecordColumns">
+		a.id,
+		a.employee_id,
+		b.user_no as "employee.userNo",
+		u.name as "user.name",
+		a.insured_type,
+		a.unit_payment,
+		a.people_payment,
+		a.payment_date,
+		a.comments,
+		a.del_flag,
+		ir.INSURANCE_TYPE as "insuranceRule.insuranceType"
+	</sql>
+	
+	<sql id="insuranceRecordJoins">
+	   LEFT JOIN hr_insurance_rule ir ON ir. id=a.insured_type
+	   LEFT JOIN hr_user_employee b ON b. ID = A .employee_id
+ 	   LEFT JOIN sys_user u on u.id = a.employee_id
+ 	   LEFT JOIN sys_office o on o.id = u.office_id
+	</sql>
+	
+	<!--根据用户编号查询用户参保信息-->
+    <select id="get" resultType="InsuranceRecord">
+        SELECT
+	        <include refid="insuranceRecordColumns"/>
+	    FROM hr_insurance_record a
+	    <include refid="insuranceRecordJoins"/>
+	    WHERE a.id = #{id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+    </select>
+    
+     <!--分页查询-->
+    <select id="findList" resultType="InsuranceRecord">
+		SELECT
+			<include refid="insuranceRecordColumns"/>
+		FROM hr_insurance_record a
+		<include refid="insuranceRecordJoins"/>
+		WHERE a.employee_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select> 
+	
+	<!--全部查询-->
+	<select id="findAllList" resultType="InsuranceRecord">
+		SELECT
+			<include refid="insuranceRecordColumns"/>
+		FROM hr_insurance_record a
+		<include refid="insuranceRecordJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+	</select>
+	
+	<!--增加用户参保信息-->
+    <insert id="insert">
+        INSERT INTO hr_insurance_record(
+         	id,
+			employee_id,
+			insured_type,
+			unit_payment,
+			people_payment,
+			payment_date,
+			comments,		
+			del_flag
+        )VALUES(
+	        #{id},
+            #{employee.id},
+		    #{insuredType},
+		    #{unitPayment},
+		    #{peoplePayment},
+		    #{paymentDate},
+		    #{comments},
+		    #{delFlag}
+	    )
+    </insert>
+    
+     <!-- 更新用户参保信息 -->
+    <update id="update">
+		UPDATE hr_insurance_record SET 
+			id = #{id},
+            employee_id = #{employee.id},
+		    insured_type=#{insuredType},													
+			unit_payment=#{unitPayment},													
+			people_payment=#{peoplePayment},											
+			payment_date=#{paymentDate},
+			comments=#{comments},
+			del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 逻辑删除用户参保信息 -->
+	<update id="delete">
+		UPDATE hr_insurance_record SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+    
+    
+</mapper>

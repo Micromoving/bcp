@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.RecruitmentDao">
+
+	<sql id="recruitmentColumns">
+		a.id,
+		a.employee_id as "user.id",
+		u.office_id as "user.office.id",
+		u.name as "user.name",
+		b.user_no as "employee.userNo",
+		o.name as "office.name",
+		a.duties,
+		a.post_type,
+		a.post_level,
+		a.professional_level,
+		a.duties_level,
+		a.try_out_date,
+		a.engage_situation,
+		a.start_date,
+		a.end_date,
+		a.is_sign_contract,
+		a.update_date,
+		a.del_flag
+	</sql>
+
+
+	<sql id="recruitmentJoins">
+		LEFT JOIN hr_user_employee b ON b.id = a.employee_id
+		LEFT JOIN sys_user u ON u.id = a.employee_id
+		LEFT JOIN sys_office o ON o.id = u.office_id
+	</sql>
+
+
+	<!--根据岗位编号查询用户岗位聘任情况信息 -->
+	<select id="get" resultType="Recruitment">
+		SELECT
+		<include refid="recruitmentColumns" />
+		FROM hr_recruitment a
+		<include refid="recruitmentJoins" />
+		WHERE a.id = #{id}
+		ORDER BY a.post_type,a.post_level
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="Recruitment">
+		SELECT
+		<include refid="recruitmentColumns" />
+		FROM hr_recruitment a
+		<include refid="recruitmentJoins" />
+		WHERE a.employee_id = #{user.id}
+		ORDER BY a.post_type,a.post_level
+	</select>
+	<!--查询 -->
+	<select id="findPostNameList" resultType="Recruitment">
+		select distinct post_name from HR_POST where OFFICE_ID=#{u.officeId}
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="Recruitment">
+		SELECT
+		<include refid="recruitmentColumns" />
+		FROM hr_recruitment a
+		<include refid="recruitmentJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		order by b.user_no asc
+	</select>
+
+
+	<!--增加用户岗位聘任情况信息 -->
+	<insert id="insert">
+		INSERT INTO hr_recruitment(
+		id,
+		employee_id,
+		office_id,
+		duties,
+		post_type,
+		post_level,
+		professional_level,
+		duties_level,
+		try_out_date,
+		engage_situation,
+		start_date,
+		end_date,
+		is_sign_contract,
+		update_date,
+		del_flag
+		)VALUES(
+		#{id},
+		#{user.id},
+		#{user.office.id},
+		#{duties},
+		#{postType},
+		#{postLevel},
+		#{professionalLevel},
+		#{dutiesLevel},
+		#{tryOutDate},
+		#{engageSituation},
+		#{startDate},
+		#{endDate},
+		#{isSignContract},
+		#{updateDate},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户岗位聘任情况信息 -->
+	<update id="update">
+		UPDATE hr_recruitment SET
+		id = #{id},
+		employee_id = #{user.id},
+		office_id=#{user.office.id},
+		duties=#{duties},
+		post_type=#{postType},
+		post_level=#{postLevel},
+		professional_level=#{professionalLevel},
+		duties_level=#{dutiesLevel},
+		try_out_date=#{tryOutDate},
+		engage_situation=#{engageSituation},
+		start_date=#{startDate},
+		end_date= #{endDate},
+		is_sign_contract= #{isSignContract},
+		update_date = #{updateDate},
+		del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+
+	<!--删除用户校内岗位履历信息 -->
+	<delete id="delete">
+     DELETE FROM hr_recruitment 
+     WHERE id = #{id}
+	</delete>
+
+
+</mapper>	

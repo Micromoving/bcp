@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.salaryInstancePerformanceDao">
+
+
+	<sql id="salaryInstancePerformanceColumns">
+		a . id,
+		a.salary_instance_id as "salaryInstance.id",													
+		a.office_id as "office.id",								
+		a .del_flag
+	</sql>
+
+	<sql id="salaryInstancePerformanceJoins">
+		LEFT JOIN sys_office o ON o.id=a.office_id
+		LEFT JOIN hr_salary_instance s ON s.id=a.salary_instance_id
+	</sql>
+
+	<!--根据用户编号查询上报记录信息 -->
+	<select id="get" resultType="SalaryInstancePerformance">
+		SELECT
+		<include refid="salaryInstancePerformanceColumns" />
+		FROM hr_salary_instance_performance  a
+		<include refid="salaryInstancePerformanceJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="SalaryInstancePerformance">
+		SELECT
+		<include refid="salaryInstancePerformanceColumns" />
+		FROM hr_salary_instance_performance  a
+		<include refid="salaryInstancePerformanceJoins" />
+		WHERE a.salary_instance_id = #{salaryInstance.id}
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="SalaryInstancePerformance">
+		SELECT
+		<include refid="salaryInstancePerformanceColumns" />
+		FROM hr_salary_instance_performance  a
+		<include refid="salaryInstancePerformanceJoins" />
+		WHERE a.salary_instance_id = #{salaryInstance.id}
+		AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加上报记录信息 -->
+	<insert id="insert">
+		INSERT INTO hr_salary_instance_performance (
+			id,
+			salary_instance_id,
+			office_id,
+			del_flag
+		)VALUES(
+			#{id},
+			#{salaryInstance.id},
+			#{office.id},
+			#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新上报记录信息 -->
+	<update id="update">
+		UPDATE hr_salary_instance_performance  SET
+			id=#{id},
+			salary_instance_id=#{salaryInstance.id},
+			office_id=#{office.id},
+			del_fla=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除上报记录信息 -->
+	<update id="delete">
+		UPDATE hr_salary_instance_performance  SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE	id = #{id}
+	</update>
+
+</mapper>

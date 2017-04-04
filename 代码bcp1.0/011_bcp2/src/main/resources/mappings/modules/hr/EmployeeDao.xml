@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.EmployeeDao">
+	<sql id="employeeColumns">
+		a.id,
+		a.name,
+		b.name as "user.name",
+		b.photo as "user.photo",
+		b.company_id as "user.company.id",
+		b.office_id as "user.office.id",
+		b.email as "user.email",
+		b.user_type as "user.type",
+		a.name_used_before,
+		a.gender,
+		a.nationality_region,
+		a.identity_document_type,
+		a.id_number,
+		a.birth_date,
+		a.native_place,
+		a.birth_place,
+		a.nation,
+		a.political_landscape,
+		a.marital_status,
+		a.health,
+		a.in_work_date,
+		a.in_school_date,
+		a.staff_source,
+		a.staff_type,
+		a.preparation_situation,
+		a.whether_in_series,
+		a.the_human_form,
+		a.personnel_status,
+		a.sign_the_contract,
+		a.learning_edge_structure,
+		a.information_technology,
+		a.whether_double_teacher,
+		a.certificate_of_vocational,
+		a.special_teacher,
+		a.enterprise_work,
+		a.engaging_date,
+		a.employment_type,
+		a.school_employment,
+		a.my_identity,
+		a.personnel_agency,
+		a.mobile_phone,
+		a.office_telephone,
+		a.QQ,
+		a.home_address,
+		a.zip_code,
+		a.incumbency_status,
+		a.only_child_end_date,
+		a.place_domicile,
+		a.ADD_TIME as "addDate",
+		a.personal_profile,
+		a.personnel_type,
+		a.is_special,
+		c.name AS
+		"user.company.name",
+		o.grade AS "office.grade" ,		
+		o.id AS "office.id" ,
+		o.parent_id AS "office.parent" ,
+		o.name AS "office.name",
+		a.del_flag,
+		b.login_name as "userNo"
+
+	</sql>
+	
+	<sql id="employeeJoins">
+		LEFT JOIN sys_user b ON b.id = a.id
+		LEFT JOIN sys_office c ON c.id = b.company_id
+		LEFT JOIN sys_office o ON o.id = b.office_id
+	</sql>
+
+	<!-- 根据编号获得用户 -->
+	<select id="get" resultType="Employee">
+		SELECT
+		<include refid="employeeColumns" />
+		FROM hr_employee a
+		<include refid="employeeJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询用户信息 -->
+	<select id="findList" resultType="Employee">
+		SELECT
+		<include refid="employeeColumns" />
+		FROM hr_employee a
+		<include refid="employeeJoins" />
+
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+
+		<!-- 按姓名查询 -->
+		<if test="name != null and name != ''">
+			AND b.name like
+			<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{name}, '%')</if>
+		</if>
+
+		<!-- 按部门查询 -->
+		<if test="office!=null and office.id != null and office.id != ''">
+			AND (b.office_id = #{office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+
+		<!-- 按政治面貌查询 -->
+		<if test="politicalLandscape!=null and politicalLandscape!=''">
+			AND (a.political_landscape = #{politicalLandscape} )
+
+		</if>
+
+
+
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY b.office_id, a.in_school_date
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 查询全部用户 -->
+	<select id="findAllList" resultType="Employee">
+		SELECT
+		<include refid="employeeColumns" />
+		FROM hr_employee a
+		<include refid="employeeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 按用户类型为1(教师)查询 -->
+		<if test="user!=null and user.userType!=null and user.userType!=''">
+			AND b.user_type=#{user.userType}
+		</if>
+		order by a.user_no asc
+	</select>
+
+	<!-- 插入职员信息 -->
+	<insert id="insert">
+		INSERT INTO hr_employee(
+		id,
+		name,
+		name_used_before,
+		gender,
+		nationality_region,
+		identity_document_type,
+		id_number,
+		birth_date,
+		native_place,
+		birth_place,
+		nation,
+		political_landscape,
+		marital_status,
+		health,
+		in_work_date,
+		in_school_date,
+		staff_source,
+		staff_type,
+		preparation_situation,
+		whether_in_series,
+		the_human_form,
+		personnel_status,
+		sign_the_contract,
+		learning_edge_structure,
+		information_technology,
+		whether_double_teacher,
+		certificate_of_vocational,
+		special_teacher,
+		enterprise_work,
+		engaging_date,
+		employment_type,
+		school_employment,
+		my_identity,
+		personnel_agency,
+		mobile_phone,
+		office_telephone,
+		QQ,
+		home_address,
+		zip_code,
+		incumbency_status,
+		only_child_end_date,
+		place_domicile,
+		ADD_TIME,
+		office_id,
+		personnel_type,
+		personal_profile,
+		is_special,
+		del_flag
+
+		)VALUES(
+		#{id},
+		#{name},
+		#{nameUsedBefore},
+		#{gender},
+		#{nationalityRegion},
+		#{identityDocumentType},
+		#{idNumber},
+		#{birthDate},
+		#{nativePlace},
+		#{birthPlace},
+		#{nation},
+		#{politicalLandscape},
+		#{maritalStatus},
+		#{health},
+		#{inWorkDate},
+		#{inSchoolDate},
+		#{staffSource},
+		#{staffType},
+		#{preparationSituation},
+		#{whetherInSeries},
+		#{theHumanForm},
+		#{personnelStatus},
+		#{signTheContract},
+		#{learningEdgeStructure},
+		#{informationTechnology},
+		#{whetherDoubleTeacher},
+		#{certificateOfVocational},
+		#{specialTeacher},
+		#{enterpriseWork},
+		#{engagingDate},
+		#{employmentType},
+		#{schoolEmployment},
+		#{myIdentity},
+		#{personnelAgency},
+		#{mobilePhone},
+		#{officeTelephone},
+		#{QQ},
+		#{homeAddress},
+		#{zipCode},
+		#{incumbencyStatus},
+		#{onlyChildEndDate},
+		#{placeDomicile},
+		#{addDate},
+		#{office.id},
+		#{personnelType},
+		#{personalProfile},
+		#{isSpecial},
+		#{delFlag}
+
+		)
+	</insert>
+
+	<!--更新用户职员信息 -->
+	<update id="update">
+		UPDATE hr_employee SET
+		id=#{id},
+		name=#{name},
+		name_used_before=#{nameUsedBefore},
+		gender=#{gender},
+		nationality_region=#{nationalityRegion},
+		identity_document_type=#{identityDocumentType},
+		id_number=#{idNumber},
+		birth_date=#{birthDate},
+		native_place=#{nativePlace},
+		birth_place=#{birthPlace},
+		nation= #{nation},
+		political_landscape=#{politicalLandscape},
+		marital_status=#{maritalStatus},
+		health=#{health},
+		in_work_date=#{inWorkDate},
+		in_school_date=#{inSchoolDate},
+		staff_source=#{staffSource},
+		staff_type=#{staffType},
+		preparation_situation=#{preparationSituation},
+		whether_in_series=
+		#{whetherInSeries},
+		the_human_form=#{theHumanForm},
+		personnel_status=#{personnelStatus},
+		sign_the_contract=#{signTheContract},
+		learning_edge_structure=#{learningEdgeStructure},
+		information_technology=#{informationTechnology},
+		whether_double_teacher=#{whetherDoubleTeacher},
+		certificate_of_vocational=#{certificateOfVocational},
+		special_teacher=#{specialTeacher},
+		enterprise_work=#{enterpriseWork},
+		engaging_date=#{engagingDate},
+		employment_type=#{employmentType},
+		school_employment=#{schoolEmployment},
+		my_identity=#{myIdentity},
+		personnel_agency=#{personnelAgency},
+		mobile_phone=#{mobilePhone},
+		office_telephone=#{officeTelephone},
+		QQ=#{QQ},
+		home_address=#{homeAddress},
+		zip_code=#{zipCode},
+		incumbency_status=#{incumbencyStatus},
+		only_child_end_date=#{onlyChildEndDate},
+		place_domicile=#{placeDomicile},
+		ADD_TIME=#{addDate},
+		office_id=#{office.id},
+		personnel_type=#{personnelType},
+		personal_profile=#{personalProfile},
+		is_special=#{isSpecial},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+	<!--删除用户职员信息 -->
+	<delete id="delete">
+		UPDATE hr_employee SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

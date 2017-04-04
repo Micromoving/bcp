@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SkillsDao">
+	<sql id="skillsColumns">
+		a.ID,
+		a.EMPLOYEE_ID as "employee.id",
+		a.OTHER_SKILLS,
+		a.MASTER_DEGREE,
+		a.del_flag,
+		o.id as "employee.office.id",
+		o.name as "employee.office.name",
+		e.name as "employee.name"
+
+	</sql>
+
+	<sql id="skillsJoins">
+		
+		LEFT JOIN hr_employee e on e.id=a.employee_id
+		LEFT JOIN sys_user u on u.id=a.employee_id
+		LEFT JOIN sys_office o on o.id=u.office_id
+	</sql>
+
+	<!-- 根据编号获得用户其他技能 -->
+	<select id="get" resultType="Skills">
+		SELECT
+		<include refid="skillsColumns" />
+		FROM hr_skills a
+		<include refid="skillsJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询 -->
+	<select id="findList" resultType="Skills">
+		SELECT
+		<include refid="skillsColumns" />
+		FROM hr_skills a
+		<include refid="skillsJoins" />
+
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+
+	</select>
+
+	<!-- 查询全部用户 -->
+	<select id="findAllList" resultType="Skills">
+		SELECT
+		<include refid="skillsColumns" />
+		FROM hr_skills a
+		<include refid="skillsJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+
+	</select>
+
+	<!-- 插入职员其他技能信息 -->
+	<insert id="insert">
+		INSERT INTO hr_skills(
+		id,
+		employee_id,
+		other_skills,
+		master_degree,
+		del_flag
+
+    	)VALUES(
+		#{id},
+		#{employee.id},
+		#{otherSkills},
+		#{masterDegree},
+		#{delFlag}
+		
+		)
+	</insert>
+
+	<!--更新用户其他技能信息 -->
+	<update id="update">
+		UPDATE hr_skills SET
+		ID=#{id},
+		EMPLOYEE_ID=#{employee.id},
+		OTHER_SKILLS=#{otherSkills},
+		MASTER_DEGREE=#{masterDegree}
+		WHERE id = #{id}
+		
+	</update>
+
+	<!--删除用户其他技能信息 -->
+	<delete id="delete">
+		UPDATE hr_skills SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

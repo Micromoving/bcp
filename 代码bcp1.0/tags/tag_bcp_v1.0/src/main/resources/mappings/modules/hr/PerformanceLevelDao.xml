@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.PerformanceLevelDao">
+
+
+	<sql id="performancelevelColumns">
+		a.id,
+		a.plan_id as "salaryPlan.id",
+		a.salary_id as
+		"salarystandard.id",
+		a.performance_level,
+		a.performance_salary,
+		e.post_type as "salarystandard.postType",
+		a.del_flag
+	</sql>
+
+	<sql id="performancelevelJoins">
+		left join hr_salary_plan b on b.id =a.plan_id
+		LEFT JOIN
+		hr_salary_standard e ON e.id = a.salary_id
+	</sql>
+
+	<!--根据用户编号查询用户教育情况信息 -->
+	<select id="get" resultType="PerformanceLevel">
+		SELECT
+		<include refid="performancelevelColumns" />
+		FROM hr_performance_level a
+		<include refid="performancelevelJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="PerformanceLevel">
+		SELECT
+		<include refid="performancelevelColumns" />
+		FROM hr_performance_level a
+		<include refid="performancelevelJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if
+			test="salarystandard!=null and salarystandard.id!=null and salarystandard.id!=''">
+			AND a.salary_id = #{salarystandard.id}
+		</if>
+		<if
+			test="salarystandard!=null and salarystandard.postType!=null and salarystandard.postType!=''">
+			AND e.post_type = #{salarystandard.postType}
+			AND <![CDATA[ e.post_level <'10']]>
+		</if>
+		<if
+			test="salarystandard!=null and salarystandard.postLevel!=null and salarystandard.postLevel!=''">
+			and e.post_level =#{salarystandard.postLevel}
+		</if>
+
+		<if
+			test="salarystandard!=null and salarystandard.salaryPlan!=null and salarystandard.salaryPlan.id!=null and salarystandard.salaryPlan.id!=''">
+			and a.plan_id =#{salarystandard.salaryPlan.id}
+		</if>
+		ORDER BY a.performance_level asc ,e.post_level desc
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="PerformanceLevel">
+		SELECT
+		<include refid="performancelevelColumns" />
+		FROM hr_performance_level a
+		<include refid="performancelevelJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户教育情况信息 -->
+	<insert id="insert">
+		INSERT INTO hr_performance_level(
+		id,
+		plan_id ,
+		salary_id ,
+		performance_level,
+		performance_salary,
+		del_flag
+		)VALUES(
+		#{id},
+		#{salaryPlan.id},
+		#{salarystandard.id},
+		#{performanceLevel},
+		#{performanceSalary},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户教育情况信息 -->
+	<update id="update">
+		UPDATE hr_performance_level SET
+		id=#{id},
+		plan_id =
+		#{salaryPlan.id},
+		salary_id = #{salarystandard.id},
+		performance_level =
+		#{performanceLevel},
+		performance_salary=#{performanceSalary},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除用户教育情况信息 -->
+	<update id="delete">
+		UPDATE hr_performance_level SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+
+	<!-- 逻辑删除信息(按工资方案删除) -->
+	<update id="deleteByPlanId">
+		UPDATE hr_performance_level SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE plan_id = #{id}
+	</update>
+</mapper>

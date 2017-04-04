@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.quitDao">
+
+   
+    <sql id="quitColumns">
+	    a.id,	
+		a.teacher_id,
+		a.application_date,
+		a.application,
+		a.quit_date,													
+		a.quit_type,													
+		a.quit_where,											
+		a.break_contract,
+		a.return_the_training_fee,
+		a.social_insurance_backpay,
+		a.other_fee,
+		a. salary_stop_date,
+		a.social_insurance_stop_date,
+		a.archives_transfer_type,
+		a.archives_transfer_date,
+		a.del_flag
+		
+    </sql>
+    
+    <sql id="quitJoins">
+  	   
+    </sql>
+  
+    <!--根据用户编号查询用户离职信息-->
+    <select id="get" resultType="Quit">
+        SELECT
+	        <include refid="quitColumns"/>
+	    FROM hr_quit  a
+	    WHERE a.id = #{id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+    </select>
+    <!--分页查询-->
+    <select id="findList" resultType="Quit">
+		SELECT
+			<include refid="quitColumns"/>
+		FROM hr_quit a
+		<include refid="quitJoins"/>
+		WHERE a.user_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>    
+	<!--全部查询-->
+	<select id="findAllList" resultType="Quit">
+		SELECT
+			<include refid="quitColumns"/>
+		FROM hr_quit a
+		<include refid="quitJoins"/>
+		WHERE a.user_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+    <!--增加用户考核信息-->
+    <insert id="insert">
+        INSERT INTO hr_quit(
+	        id,	
+			teacher_id,
+			application_date,
+			application,
+			quit_date,													
+			quit_type,													
+			quit_where,											
+			break_contract,
+			return_the_training_fee,
+			social_insurance_backpay,
+			other_fee,
+			salary_stop_date,
+			social_insurance_stop_date,
+			archives_transfer_type,
+			archives_transfer_date,
+			del_flag
+        )VALUES(
+	        #{id},
+            #{teacher.id},
+            #{applicationDate},
+            #{application},
+		    #{quitDate},
+		    #{quitType},
+		    #{quitWhere},
+		    #{breakContract},
+		    #{returnTheTrainingFee},
+		    #{socialInsuranceBackpay},
+		    #{otherFee},
+		    #{salaryStopDate},
+		    #{socialInsuranceStopDate},
+		    #{archivesTransferType},
+		    #{archivesTransferDate},
+		    #{delFlag}
+	    )
+    </insert>
+    
+    <!-- 更新用户考核信息 -->
+    <update id="update">
+		UPDATE hr_quit SET 
+			id = #{id},
+            teacher_id = #{teacher.id},
+            application_date=#{applicationDate},
+            application=#{application},
+		    quit_date=#{quitDate},													
+			quit_type=#{quitType},													
+			quit_where=#{quitWhere},											
+			break_contract=#{breakContract},
+			return_the_training_fee=#{returnTheTrainingFee},
+			social_insurance_backpay=#{socialInsuranceStopDate},
+			other_fee=#{otherFee},
+			archives_transfer_type=#{archivesTransferType},
+			archives_transfer_date=#{archivesTransferDate},
+			del_flag=#{delFlag}	
+		WHERE id = #{id}
+	</update>
+
+    
+	
+	<!-- 逻辑删除用户考核信息 -->
+	<update id="delete">
+		UPDATE hr_quit SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+</mapper>	

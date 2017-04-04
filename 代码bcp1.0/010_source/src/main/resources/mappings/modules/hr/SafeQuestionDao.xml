@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.SafeQuestionDao">
+
+	<sql id="safeQuestionColumns">
+	    a.id,													
+		a.first_verification_question,													
+		a.second_verification_question,													
+		a.third_verification_question,													
+		a.custom_question,													
+		a.first_answer,													
+		a.second_answer,													
+		a.third_answer,													
+		a.custom_answer													  
+	</sql>
+	
+	<sql id="safeQuestionJoins">
+	 
+    </sql>
+    
+        <!--根据编号查询安全问题表信息-->
+    <select id="get" resultType="safeQuestion">
+        SELECT
+	        <include refid="safeQuestionColumns"/>
+	    FROM hr_safe_question a
+	    WHERE a.id = #{id}
+    </select>
+  
+	<!--增加安全问题表信息-->
+    <insert id="insert">
+        INSERT INTO hr_safe_question(
+        	id,													
+			first_verification_question,													
+			second_verification_question,													
+			third_verification_question,													
+			custom_question,													
+			first_answer,													
+			second_answer,													
+			third_answer,													
+			custom_answer
+        )VALUES(
+	        #{id},
+		    #{firstVerificationQuestion},
+		    #{secondVerificationQuestion},
+			#{thirdVerificationQuestion},
+			#{customQuestion},
+			#{firstAnswer},
+			#{secondAnswer},
+			#{thirdAnswer},
+			#{customAnswer}
+	    )
+    </insert>
+    
+    <!-- 更新安全问题表信息 -->
+    <update id="update">
+		UPDATE hr_safe_question SET 
+			id=#{id},													
+			first_verification_question=#{firstVerificationQuestion},													
+			second_verification_question=#{secondVerificationQuestion},													
+			third_verification_question=#{thirdVerificationQuestion},													
+			custom_question=#{customQuestion},													
+			first_answer=#{firstAnswer},													
+			second_answer=#{secondAnswer},													
+			third_answer=#{thirdAnswer},													
+			custom_answer=#{customAnswer}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 逻辑删除安全问题信息 -->
+	<update id="delete">
+		UPDATE hr_safe_question SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+		    
+	</mapper>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.CertificateInformationDao">
+	<sql id="certificateInformationColumns">
+		a.id,
+		a.employee_id as "employee.id",
+		a.certificate_type,
+		a.language_certificate,
+		a.certificate,
+		a.date_of_issuance,
+		a.issuing_unit,
+		a.certificate_number,
+		a.del_flag,
+		e.name as "employee.name",
+		o.id as "employee.office.id",
+		o.name as "employee.office.name",
+		o.id as "office.id",
+		o.name as "office.name",
+		u.name as "user.name",
+		e.political_landscape as "employee.politicalLandscape",
+		u.login_name as "user.loginName"
+	</sql>
+
+	<sql id="certificateInformationJoins">
+	LEFT JOIN hr_employee e on e.id = a.employee_id
+	LEFT JOIN sys_user u on u.id = a.employee_id
+	LEFT JOIN sys_office o on o.id = u.office_id
+	</sql>
+
+	<!-- 根据编号获得荣誉信息 -->
+	<select id="get" resultType="CertificateInformation">
+		SELECT
+		<include refid="certificateInformationColumns" />
+		FROM HR_CERTIFICATE_INFO a
+		<include refid="certificateInformationJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 分页查询荣誉信息 -->
+	<select id="findList" resultType="CertificateInformation">
+		SELECT
+		<include refid="certificateInformationColumns" />
+		FROM HR_CERTIFICATE_INFO a
+		<include refid="certificateInformationJoins" />
+
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+
+	</select>
+
+	<!-- 查询全部 -->
+	<select id="findAllList" resultType="CertificateInformation">
+		SELECT
+		<include refid="certificateInformationColumns" />
+		FROM HR_CERTIFICATE_INFO a
+		<include refid="certificateInformationJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!-- 增加技能及证书（证书信息）信息-->
+	<insert id="insert">
+		INSERT INTO HR_CERTIFICATE_INFO(
+		id,
+		employee_id,
+		certificate_type,
+		language_certificate,
+		certificate,
+		date_of_issuance,
+		issuing_unit,
+		certificate_number,
+		job_number,
+		del_flag
+
+
+		)VALUES(
+		#{id},
+		#{employee.id},
+		#{certificateType},
+		#{languageCertificate},
+		#{certificate},
+		#{dateOfIssuance},
+		#{issuingUnit},
+		#{certificateNumber},
+		#{employee.userNo},
+		#{delFlag}
+		
+		)
+	</insert>
+
+	<!--更新技能及证书（证书信息）信息 -->
+	<update id="update">
+		UPDATE HR_CERTIFICATE_INFO SET
+		id=#{id},
+		employee_id=#{employee.id},
+		certificate_type=#{certificateType},
+		language_certificate=#{languageCertificate},
+		certificate=#{certificate},
+		date_of_issuance=#{dateOfIssuance},
+		issuing_unit=#{issuingUnit},
+		certificate_number=#{certificateNumber},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+    </update>
+
+	<!--删除技能及证书（证书信息）信息 -->
+	<delete id="delete">
+		UPDATE HR_CERTIFICATE_INFO SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

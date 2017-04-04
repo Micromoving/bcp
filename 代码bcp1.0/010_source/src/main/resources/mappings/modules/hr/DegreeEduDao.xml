@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.DegreeEduDao">
+
+
+	<sql id="degreeEduColumns">
+
+		b.name as "user.name",
+		o.name as "office.name",
+		a.id,
+		a.employee_id as "user.id",
+		a.diploma,
+		a.degree,
+		a.edu_mode,
+		a.edu_type,
+		a.is_offjob,
+		a.sign_agreement,
+		a.age_limit,
+		a.school,
+		a.major,
+		a.research_area,
+		a.start_date,
+		a.end_date,
+		a.is_confirm,
+		a.tuition,
+		a.loan,
+		a.loan_date,
+		a.wipeout,
+		a.wipeout_date,
+		a.has_salary,
+		a.recover_salary_date,
+		a.is_delay,
+		a.get_certificate_date,
+		a.diploma_num,
+		a.degree_num,
+		a.comments,
+		a.create_by as "createBy.id",
+		a.create_date,
+		a.del_flag,
+		a.update_by as "updateBy.id",
+		a.update_date,
+		a.process_instance_id,
+		a.process_instance_id as "act.procInsId",
+		a.data_state, 
+		pro.max_name as "protp.name",
+        pro.max_TECH_POSITION_LEVEL as  "protp.techPositionLevel",
+         o.grade as "office.grade",
+        o.parent_id as "office.parent.id"
+	</sql>
+
+	<sql id="degreeEduJoins">
+		LEFT JOIN sys_user b ON b.id = a.employee_id
+		LEFT JOIN
+		sys_office o ON o.id = b.office_id
+		LEFT JOIN (
+			SELECT
+			P .employee_id,
+			MAX (P .name) max_name,
+			Max (P .TECH_POSITION_LEVEL) max_TECH_POSITION_LEVEL
+			FROM
+			HR_PRO_TECH_POSITION P
+			WHERE
+			del_flag = 0
+			GROUP BY
+			P .EMPLOYEE_ID
+		) pro ON PRO.employee_id = a . employee_id
+	</sql>
+
+	<!--根据用户编号查询用户学历教育信息 -->
+	<select id="get" resultType="DegreeEdu">
+		SELECT
+		<include refid="degreeEduColumns" />
+		FROM hr_degree_edu a
+		<include refid="degreeEduJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<!-- 根据流程实例ID，取得请假实体记录。 -->
+	<select id="getByProcInsId" resultType="DegreeEdu">
+		SELECT
+		<include refid="degreeEduColumns" />
+		FROM hr_degree_edu a
+		<include refid="degreeEduJoins" />
+		WHERE a.process_instance_id = #{act.procInsId}
+	</select>
+
+	<!--分页查询 -->
+	<select id="findList" resultType="DegreeEdu">
+		SELECT
+		<include refid="degreeEduColumns" />
+		FROM hr_degree_edu a
+		<include refid="degreeEduJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="id != null and id != ''">
+			and a.id=#{id}
+		</if>
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="DegreeEdu">
+		SELECT
+		<include refid="degreeEduColumns" />
+		FROM hr_degree_edu a
+		<include refid="degreeEduJoins" />
+		WHERE a.user_id = #{user.id} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+	<!--增加用户学历教育信息 -->
+	<insert id="insert">
+		INSERT INTO hr_degree_edu(
+		id,
+		employee_id,
+		diploma,
+		degree,
+		edu_mode,
+		edu_type,
+		is_offjob,
+		sign_agreement,
+		age_limit,
+		school,
+		major,
+		research_area,
+		start_date,
+		end_date,
+		is_confirm,
+		tuition,
+		loan,
+		loan_date,
+		wipeout,
+		wipeout_date,
+		has_salary,
+		recover_salary_date,
+		is_delay,
+		get_certificate_date,
+		diploma_num,
+		degree_num,
+		comments,
+		del_flag，
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		process_instance_id,
+		data_state
+		)VALUES(
+		#{id},
+		#{user.id},
+		#{diploma},
+		#{degree},
+		#{eduMode},
+		#{eduType},
+		#{isOffjob},
+		#{signAgreement},
+		#{ageLimit},
+		#{school},
+		#{major},
+		#{researchArea},
+		#{startDate},
+		#{endDate},
+		#{isConfirm},
+		#{tuition},
+		#{loan},
+		#{loanDate},
+		#{wipeout},
+		#{wipeoutDate},
+		#{hasSalary},
+		#{recoverSalaryDate},
+		#{isDelay},
+		#{getCertificateDate},
+		#{diplomaNum},
+		#{degreeNum},
+		#{comments},
+		#{delFlag},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{act.procInsId},
+		#{dataState}
+		)
+	</insert>
+
+	<!-- 更新用户学历教育信息 -->
+	<update id="update">
+		UPDATE hr_degree_edu SET
+		id = #{id},
+		employee_id =
+		#{user.id},
+		diploma=#{diploma},
+		degree=#{degree},
+		edu_mode=#{eduMode},
+		edu_type= #{eduType},
+		is_offjob= #{isOffjob},
+		sign_agreement=#{signAgreement},
+		age_limit=#{ageLimit},
+		school=
+		#{school},
+		major=#{major},
+		research_area= #{researchArea},
+		start_date=
+		#{startDate},
+		end_date=#{endDate},
+		is_confirm= #{isConfirm},
+		tuition=#{tuition},
+		loan=#{loan},
+		loan_date=#{loanDate},
+		wipeout=#{wipeout},
+		wipeout_date=#{wipeoutDate},
+		has_salary=
+		#{hasSalary},
+		recover_salary_date= #{recoverSalaryDate},
+		is_delay=#{isDelay},
+		get_certificate_date=#{getCertificateDate},
+		diploma_num=#{diplomaNum},
+		degree_num=#{degreeNum},
+		comments=#{comments},
+		del_flag=#{delFlag},
+		process_instance_id=#{act.procInsId},
+		create_by=#{createBy.id},
+		create_date=#{createDate},
+		update_by=#{updateBy.id},
+		update_date=#{updateDate},
+		data_state = #{dataState}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 逻辑删除用户学历教育信息 -->
+	<update id="delete">
+		UPDATE hr_degree_edu SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+</mapper>	

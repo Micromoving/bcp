@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.EmpPerformanceLevelDao">
+
+
+	<sql id="empPerformancelevelColumns">
+		a.id,
+		a.report_record_id as "reportRecord.id",
+		a.employee_id as "user.id",
+		a.performance_level,
+		a.comments,
+		a.start_date,
+		a.end_date,
+		a.del_flag,
+		r.year_month AS "reportRecord.yearMonth",
+		r.update_date AS  "reportRecord.updateDate",
+		o.id as "office.id",
+		o.name as "office.name",
+		u.name as "user.name",
+		u.id as "user.id",
+		u.login_name as "user.loginName",
+		u.login_name,
+		u.name,
+		u.office_id as  "user.office.id",
+		o.name as  "user.office.name",
+		sev.professional_level as "professionalLevel"
+	</sql>
+
+	<sql id="empPerformancelevelJoins">
+		LEFT join hr_report_record r on r.id =a.report_record_id
+		LEFT JOIN sys_user u ON u.ID = A .employee_id
+		LEFT JOIN sys_office o on o.id = u.office_id
+		LEFT JOIN SAL_EMP_VIEW sev  on sev.id = a.employee_id
+	</sql>
+
+	<!--根据用户编号查询用户教育情况信息 -->
+	<select id="get" resultType="EmpPerformancelevel">
+		SELECT
+		<include refid="empPerformancelevelColumns" />
+		FROM hr_emp_performance_level a
+		<include refid="empPerformancelevelJoins" />
+		where a.id=#{id}
+	</select>
+	<!--分页查询 -->
+	<select id="findList" resultType="EmpPerformancelevel">
+		SELECT
+		<include refid="empPerformancelevelColumns" />
+		FROM hr_emp_performance_level a
+		<include refid="empPerformancelevelJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="user!=null and user.name!=null and user.name!=''">
+			and u.name like
+			<if test="dbName == 'oracle'">'%'||#{user.name}||'%'</if>
+			<if test="dbName == 'mssql'">'%'+#{user.name}+'%'</if>
+			<if test="dbName == 'mysql'">CONCAT('%', #{user.name}, '%')</if>
+		</if>
+		<if
+			test="user!=null and user.office!=null and user.office.id!=null and user.office.id!=''">
+			and (u.office_id = #{user.office.id} OR o.parent_ids LIKE
+			<if test="dbName == 'oracle'">'%,'||#{user.office.id}||',%')</if>
+			<if test="dbName == 'mssql'">'%,'+#{user.office.id}+',%')</if>
+			<if test="dbName == 'mysql'">CONCAT('%,', #{user.office.id}, ',%'))</if>
+		</if>
+		<if 
+		     test="reportRecord!=null and reportRecord.id!=null and reportRecord.id!=''" >
+		         and(A .report_record_id  = #{reportRecord.id})  
+		</if>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		order by u.login_name asc
+	</select>
+	<!--全部查询 -->
+	<select id="findAllList" resultType="EmpPerformancelevel">
+		SELECT
+		<include refid="empPerformancelevelColumns" />
+		FROM hr_emp_performance_level a
+		<include refid="empPerformancelevelJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		and r.data_classification=4
+	</select>
+
+	<!--增加用户教育情况信息 -->
+	<insert id="insert">
+		INSERT INTO hr_emp_performance_level(
+		id,
+		employee_id,
+		report_record_id,
+		performance_level,
+		comments,
+		start_date,
+		end_date,
+		del_flag
+		)VALUES(
+		#{id},
+		#{user.id},
+		#{reportRecord.id},
+		#{performanceLevel},
+		#{comments},
+		#{reportRecord.yearMonth},
+		#{endDate},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- 更新用户教育情况信息 -->
+	<update id="update">
+		UPDATE hr_emp_performance_level SET
+		id=#{id},
+		employee_id=#{user.id},
+		report_record_id=#{reportRecord.id},
+		performance_level = #{performanceLevel},
+		comments=#{comments},
+		start_date=#{reportRecord.yearMonth},
+		end_date=#{endDate},
+		del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<!-- 逻辑删除用户教育情况信息 -->
+	<update id="delete">
+		UPDATE hr_emp_performance_level SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE
+		id = #{id}
+	</update>
+
+	<update id="deleteByReportId">
+		delete from hr_emp_performance_level
+		where report_record_id=#{reportRecord.id}
+	</update>
+	
+</mapper>

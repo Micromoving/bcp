@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.micromoving.bcp.modules.hr.dao.StandardViewDao">
+
+	<sql id="salStandardViewColumns">
+		a.post_type,
+		a.post_level,
+		a.professional_level,
+		a.edu_background,
+		a.professional_level_salary,
+		a.post_salary,
+		a.performance_level,
+		a.performance_salary,
+		a.post_subside
+	</sql>
+
+	<sql id="salStandardViewJoins">
+
+	</sql>
+
+	<!--根据用户编号查询用户离退休表信息 -->
+	<select id="get" resultType="SalStandardView">
+		SELECT
+		<include refid="salStandardViewColumns" />
+		FROM sal_standard_view a
+		WHERE a.id = #{id}
+	</select>
+
+	<!--分页查询-->
+    <select id="findList" resultType="SalStandardView">
+		SELECT
+			<include refid="salStandardViewColumns"/>
+		FROM sal_standard_view a
+		<include refid="salStandardViewJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+</mapper>
